@@ -11,18 +11,27 @@ class Menu:
     def update(self):
         if pyxel.btn(pyxel.KEY_SPACE):
             if self.col1_id == self.col2_id:
-                pass
+                pyxel.play(0,4)
             else:
-                Jeu(self.colors[self.col1_id])
+                Jeu(self.colors[self.col1_id],self.colors[self.col2_id])
 
-        if pyxel.btnp(pyxel.KEY_RIGHT):
+        if pyxel.btnp(pyxel.KEY_D):
             if self.col1_id == 11:
                 self.col1_id = 0
             else: self.col1_id += 1
-        elif pyxel.btnp(pyxel.KEY_LEFT):
+        elif pyxel.btnp(pyxel.KEY_Q):
             if self.col1_id == 0:
                 self.col1_id = 11
             else: self.col1_id -= 1
+
+        if pyxel.btnp(pyxel.KEY_RIGHT):
+            if self.col2_id == 11:
+                self.col2_id = 0
+            else: self.col2_id += 1
+        elif pyxel.btnp(pyxel.KEY_LEFT):
+            if self.col2_id == 0:
+                self.col2_id = 11
+            else: self.col2_id -= 1
 
     def draw(self):
         pyxel.mouse(True)
@@ -33,18 +42,21 @@ class Menu:
 
 class Jeu:
     def __init__(self, col1, col2):
-        self.j1 = Joueur(0, self.col1)
+        self.j1 = Joueur1(0, col1)
+        self.j2 = Joueur2(0, col2)
         pyxel.run(self.update, self.draw)
 
     def update(self):
         self.j1.update()
+        self.j2.update()
 
     def draw(self):
         pyxel.cls(11)
         self.j1.draw()
+        self.j2.draw()
 
 
-class Joueur:
+class Joueur1:
     def __init__(self, team, color):
         """
         :param team: équipe
@@ -66,6 +78,34 @@ class Joueur:
         elif pyxel.btn(pyxel.KEY_Q):
             self.x = self.x - self.speed
         elif pyxel.btn(pyxel.KEY_D):
+            self.x = self.x + self.speed
+
+    def draw(self):
+        pyxel.circ(self.x, self.y, self.size, self.color)
+
+
+class Joueur2:
+    def __init__(self, team, color):
+        """
+        :param team: équipe
+        :param color: couleur
+        """
+        self.team = team
+        self.x = 120
+        self.y = 120
+        self.size = 6
+        self.points = 0
+        self.speed = 3
+        self.color = color
+
+    def update(self):
+        if pyxel.btn(pyxel.KEY_UP):
+            self.y = self.y - self.speed
+        elif pyxel.btn(pyxel.KEY_DOWN):
+            self.y = self.y + self.speed
+        elif pyxel.btn(pyxel.KEY_LEFT):
+            self.x = self.x - self.speed
+        elif pyxel.btn(pyxel.KEY_RIGHT):
             self.x = self.x + self.speed
 
     def draw(self):
