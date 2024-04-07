@@ -88,6 +88,9 @@ class Jeu:
         self.j1.update()
         self.j2.update()
 
+        if pyxel.btnp(pyxel.KEY_P):
+            pass # futur menu pause
+
     def draw(self):
         pyxel.cls(11)
         self.j1.draw()
