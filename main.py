@@ -8,9 +8,8 @@ class Menu:
         self.col1_id = 3
         self.col2_id = 4
         pyxel.run(self.update, self.draw)
-
+        
     def update(self):
-        pyxel.playm(0)
         # espace est la touche qui permet de lancer le jeu
         if pyxel.btn(pyxel.KEY_SPACE):
             # empêche de lancer le jeu si deux joueurs ont la même couleur et joue un son
@@ -36,11 +35,11 @@ class Menu:
         elif 118 <= pyxel.mouse_x <= 130 and 166 >= pyxel.mouse_y >= 154:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 if self.col1_id == 0:
-                    self.col1_id = 11
+                    self.col1_id = 10
                 else:
                     self.col1_id -= 1
             if pyxel.btnp(pyxel.MOUSE_BUTTON_RIGHT):
-                if self.col1_id == 11:
+                if self.col1_id == 10:
                     self.col1_id = 0
                 else:
                     self.col1_id += 1
@@ -61,11 +60,11 @@ class Menu:
         elif 174 <= pyxel.mouse_x <= 186 and 166 >= pyxel.mouse_y >= 154:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 if self.col2_id == 0:
-                    self.col2_id = 11
+                    self.col2_id = 10
                 else:
                     self.col2_id -= 1
             if pyxel.btnp(pyxel.MOUSE_BUTTON_RIGHT):
-                if self.col2_id == 11:
+                if self.col2_id == 10:
                     self.col2_id = 0
                 else:
                     self.col2_id += 1
