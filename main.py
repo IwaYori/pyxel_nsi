@@ -10,7 +10,7 @@ class Menu:
         pyxel.run(self.update, self.draw)
 
     def update(self):
-
+        pyxel.playm(0)
         # espace est la touche qui permet de lancer le jeu
         if pyxel.btn(pyxel.KEY_SPACE):
             # empêche de lancer le jeu si deux joueurs ont la même couleur et joue un son
@@ -163,7 +163,7 @@ class Joueur2:
 class App:
     """classe mère qui lance la fenêtre"""
     def __init__(self):
-        pyxel.init(320, 180, title='test')
+        pyxel.init(320, 180, title='HaxBall remake')
         pyxel.run(self.update, self.draw)
 
     def update(self):
