@@ -1,3 +1,5 @@
+from typing import List
+
 import pyxel
 
 class Menu:
@@ -8,7 +10,7 @@ class Menu:
         self.col1_id = 3
         self.col2_id = 4
         pyxel.run(self.update, self.draw)
-        
+
     def update(self):
         # espace est la touche qui permet de lancer le jeu
         if pyxel.btn(pyxel.KEY_SPACE):
@@ -87,7 +89,7 @@ class Jeu:
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        self.j1.update()
+        self.j1.update(self.j2)
         self.j2.update()
 
         if pyxel.btnp(pyxel.KEY_P):
@@ -105,6 +107,7 @@ class Jeu:
 
 
 class Joueur1:
+
     def __init__(self, team, color, name):
         self.team = team
         self.x = 10
@@ -114,20 +117,33 @@ class Joueur1:
         self.speed = 2
         self.color = color
         self.name = name
+        self.collision = [False, False, False, False] #Haut Bas Gauche Droite
 
-    def update(self):
+    def update(self,j2):
+        self.isCollision(j2) #on update pour voir si il ya une collision
         # permet le déplacement du joueur par rapport à la vitesse
-        if pyxel.btn(pyxel.KEY_Z):
+        if pyxel.btn(pyxel.KEY_Z) and not self.collision[0]:
             self.y = self.y - self.speed
-        if pyxel.btn(pyxel.KEY_S):
+        if pyxel.btn(pyxel.KEY_S) and not self.collision[1]:
             self.y = self.y + self.speed
-        if pyxel.btn(pyxel.KEY_Q):
+        if pyxel.btn(pyxel.KEY_Q) and not self.collision[2]:
             self.x = self.x - self.speed
-        if pyxel.btn(pyxel.KEY_D):
+        if pyxel.btn(pyxel.KEY_D) and not self.collision[3]:
             self.x = self.x + self.speed
 
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
+
+    def isCollision(self,j2):
+        #collision en haut
+        self.collision[0]=self.y+self.size==j2.y-j2.size and self.x>=j2.x-j2.size and self.x<=j2.x+j2.size
+        #collision en bas
+        self.collision[1]=(self.y-self.size==j2.y+j2.size) and self.x>=j2.x-j2.size and self.x<=j2.x+j2.size
+        #collision gauche
+        self.collision[2]=(self.x-self.size==j2.x+j2.size) and self.y<=j2.y and self.y>=j2.y
+        #collision droite
+        self.collision[3]=(self.x+self.size==j2.x-j2.size) and self.y<=j2.y and self.y>=j2.y
+
 
 
 class Joueur2:
@@ -154,6 +170,10 @@ class Joueur2:
 
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
+
+
+
+
 
 
 ##############################################################
