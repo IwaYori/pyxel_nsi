@@ -117,6 +117,8 @@ class Joueur1:
         self.speed = 2
         self.color = color
         self.name = name
+        self.coHaut=(self.x,self.y+self.speed) #coordonnées du point le plus en haut
+        self.coBas=(self.x,self.y+self.speed)
         self.collision = [False, False, False, False] #Haut Bas Gauche Droite
 
     def update(self,j2):
@@ -138,11 +140,12 @@ class Joueur1:
         #collision en haut
         self.collision[0]=self.y+self.size==j2.y-j2.size and self.x>=j2.x-j2.size and self.x<=j2.x+j2.size
         #collision en bas
-        self.collision[1]=(self.y-self.size==j2.y+j2.size) and self.x>=j2.x-j2.size and self.x<=j2.x+j2.size
+        self.collision[1]=self.y-self.size==j2.y+j2.size and self.x>=j2.x-j2.size and self.x<=j2.x+j2.size
+
         #collision gauche
-        self.collision[2]=(self.x-self.size==j2.x+j2.size) and self.y<=j2.y and self.y>=j2.y
+        self.collision[2]=self.x-self.size==j2.x+j2.size and self.y<=j2.y+j2.size and self.y>=j2.y-j2.size
         #collision droite
-        self.collision[3]=(self.x+self.size==j2.x-j2.size) and self.y<=j2.y and self.y>=j2.y
+        self.collision[3]=self.x+self.size==j2.x-j2.size and self.y<=j2.y+j2.size and self.y>=j2.y-j2.size
 
 
 
