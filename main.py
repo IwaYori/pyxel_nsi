@@ -9,74 +9,96 @@ class Menu:
         # par défaut, joueur1 = colors[3] = 5 (bleu), joueur2 colors[4] = 8 (rouge)
         self.col1_id = 3
         self.col2_id = 4
+        self.titleText_id = 6
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        # espace est la touche qui permet de lancer le jeu
-        if pyxel.btn(pyxel.KEY_SPACE):
-            # empêche de lancer le jeu si deux joueurs ont la même couleur et joue un son
-            if self.col1_id == self.col2_id:
-                pyxel.play(0,4)
-            else:
-                # lance le jeu avec comme paramètre les deux couleurs
-                Jeu(self.colors[self.col1_id],self.colors[self.col2_id])
+        self.isGameLaunched() # vérifie si le jeu doit être lancé
+        self.isColorChanged() # vérifie si un des joueurs essaie de changer sa couleur
 
+        self.isTitleClicked() # vérifie si quelqu'un clique sur le titre (easter egg)
+
+    def col1idPlus(self):
+        if self.col1_id == 10:
+            self.col1_id = 0
+        else:
+            self.col1_id += 1
+    def col2idPlus(self):
+        if self.col2_id == 10:
+            self.col2_id = 0
+        else:
+            self.col2_id += 1
+    def col1idMinus(self):
+        if self.col1_id == 0:
+            self.col1_id = 10
+        else:
+            self.col1_id -= 1
+    def col2idMinus(self):
+        if self.col2_id == 0:
+            self.col2_id = 10
+        else:
+            self.col2_id -= 1
+
+    def isColorChanged(self):
         # permet de changer la couleur du joueur 1 à l'aide:
         # de 'Q' ou 'D', ou d'un clique gauche ou droit sur le joueur 1
         if pyxel.btnp(pyxel.KEY_D):
             # pour éviter un dépassement d'indice:
-            if self.col1_id == 10:
-                self.col1_id = 0
-            else: self.col1_id += 1
+            self.col1idPlus()
         elif pyxel.btnp(pyxel.KEY_Q):
             # pour éviter un dépassement d'indice:
-            if self.col1_id == 0:
-                self.col1_id = 10
-            else: self.col1_id -= 1
+            self.col1idMinus()
         # vérification de la position de la souris sur le joueur 1
         elif 118 <= pyxel.mouse_x <= 130 and 166 >= pyxel.mouse_y >= 154:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                if self.col1_id == 0:
-                    self.col1_id = 10
-                else:
-                    self.col1_id -= 1
+                self.col1idMinus()
             if pyxel.btnp(pyxel.MOUSE_BUTTON_RIGHT):
-                if self.col1_id == 10:
-                    self.col1_id = 0
-                else:
-                    self.col1_id += 1
+                self.col1idPlus()
 
         ##############################################################
         # permet de changer la couleur du joueur 2 à l'aide:
         # de 'GAUCHE' ou 'DROITE', ou d'un clique gauche ou droit sur le joueur 2
 
         if pyxel.btnp(pyxel.KEY_RIGHT):
-            if self.col2_id == 10:
-                self.col2_id = 0
-            else: self.col2_id += 1
+            self.col2idPlus()
         elif pyxel.btnp(pyxel.KEY_LEFT):
-            if self.col2_id == 0:
-                self.col2_id = 10
-            else: self.col2_id -= 1
-        #vérification de la position de la souris sur le joueur 2
+            self.col2idMinus()
+        # vérification de la position de la souris sur le joueur 2
         elif 174 <= pyxel.mouse_x <= 186 and 166 >= pyxel.mouse_y >= 154:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                if self.col2_id == 0:
-                    self.col2_id = 10
-                else:
-                    self.col2_id -= 1
+                self.col2idMinus()
             if pyxel.btnp(pyxel.MOUSE_BUTTON_RIGHT):
-                if self.col2_id == 10:
-                    self.col2_id = 0
+                self.col2idPlus()
+
+    def isGameLaunched(self):
+        # espace est la touche qui permet de lancer le jeu
+        if pyxel.btn(pyxel.KEY_SPACE):
+            # empêche de lancer le jeu si deux joueurs ont la même couleur et joue un son
+            if self.col1_id == self.col2_id:
+                pyxel.play(0, 4)
+            else:
+                # lance le jeu avec comme paramètre les deux couleurs
+                Jeu(self.colors[self.col1_id], self.colors[self.col2_id])
+    def isTitleClicked(self): # easter egg
+        if 142 <= pyxel.mouse_x <= 168 and 23 >= pyxel.mouse_y >= 18:
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                if self.titleText_id == 10:
+                    self.titleText_id = 0
                 else:
-                    self.col2_id += 1
+                    self.titleText_id += 1
+
 
     def draw(self):
-        pyxel.mouse(True)
+        pyxel.mouse(True) # affiche la souris sur la fenêtre
         pyxel.cls(0)
-        pyxel.text(5,6,"HaxBoule",7)
+
         pyxel.circ(124,160,6,self.colors[self.col1_id])
         pyxel.circ(180, 160, 6, self.colors[self.col2_id])
+
+        pyxel.text(142, 18, "HaxBall", self.colors[self.titleText_id])
+
+        pyxel.text(2,173, "Roan / Loris", 13)
+        pyxel.text(303, 173, "2024",13)
 
 
 class Jeu:
@@ -148,7 +170,6 @@ class Joueur1:
         self.collision[3] = self.x+self.size == j2.x-j2.size and self.y <= j2.y+j2.size and self.y >= j2.y-j2.size
 
 
-
 class Joueur2:
     def __init__(self, team, color, name):
         self.team = team
@@ -173,9 +194,6 @@ class Joueur2:
 
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
-
-
-
 
 
 
