@@ -1,5 +1,3 @@
-from typing import List
-
 import pyxel
 
 class Menu:
@@ -10,6 +8,8 @@ class Menu:
         self.col1_id = 3
         self.col2_id = 4
         self.titleText_id = 6
+        pyxel.load('PYXEL_RESOURCE_FILE.pyxres')
+        pyxel.playm(0,0,True)
         pyxel.run(self.update, self.draw)
 
     def update(self):
