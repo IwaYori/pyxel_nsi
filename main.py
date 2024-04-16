@@ -8,7 +8,6 @@ class Menu:
         self.col1_id = 3
         self.col2_id = 4
         self.titleText_id = 6
-        pyxel.load('PYXEL_RESOURCE_FILE.pyxres')
         pyxel.playm(0,0,True)
         pyxel.run(self.update, self.draw)
 
@@ -75,8 +74,9 @@ class Menu:
         if pyxel.btn(pyxel.KEY_SPACE):
             # empêche de lancer le jeu si deux joueurs ont la même couleur et joue un son
             if self.col1_id == self.col2_id:
-                pyxel.play(0, 4)
+                pyxel.play(2, 4)
             else:
+                pyxel.play(2,6)
                 # lance le jeu avec comme paramètre les deux couleurs
                 Jeu(self.colors[self.col1_id], self.colors[self.col2_id])
     def isTitleClicked(self): # easter egg
@@ -119,6 +119,7 @@ class Jeu:
         #la combinaison de touche R + O fait revenir au menu directement
         elif pyxel.btnp(pyxel.KEY_R):
             if pyxel.btnp(pyxel.KEY_O):
+                pyxel.play(2,6)
                 Menu()
 
     def draw(self):
@@ -204,6 +205,7 @@ class App:
     """classe mère qui lance la fenêtre"""
     def __init__(self):
         pyxel.init(320, 180, title='HaxBall remake')
+        pyxel.load('PYXEL_RESOURCE_FILE.pyxres')
         pyxel.run(self.update, self.draw)
 
     def update(self):
