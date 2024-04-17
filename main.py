@@ -8,6 +8,8 @@ class Menu:
         self.col1_id = 3
         self.col2_id = 4
         self.titleText_id = 6
+        self.musicState = True # voir si le joueur décide d'avoir la musique ou non
+        self.musicStateCol = 11 # couleur par défaut en 11 (vert)
         pyxel.playm(0,0,True)
         pyxel.run(self.update, self.draw)
 
@@ -16,6 +18,7 @@ class Menu:
         self.isColorChanged() # vérifie si un des joueurs essaie de changer sa couleur
 
         self.isTitleClicked() # vérifie si quelqu'un clique sur le titre (easter egg)
+        self.isMusicStateChanged() # vérifie si self.musicState est changé
 
     def col1idPlus(self):
         if self.col1_id == 10:
@@ -86,16 +89,36 @@ class Menu:
                     self.titleText_id = 0
                 else:
                     self.titleText_id += 1
+    def isMusicStateChanged(self):
+        if 2 <= pyxel.mouse_x <= 13 and 8 >= pyxel.mouse_y >= 2:
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                if self.musicState:
+                    self.musicState = False # on change l'état de la variable
+                    self.musicStateCol = 4 # on change la couleur du bouton
+                    pyxel.stop(0)
+                    pyxel.stop(1)
+                    pyxel.stop(3)
+                else:
+                    self.musicState = True # on change l'état de la variable
+                    self.musicStateCol = 11 # on change la couleur du bouton
+                    pyxel.playm(0,0,True)
 
 
     def draw(self):
         pyxel.mouse(True) # affiche la souris sur la fenêtre
         pyxel.cls(0)
 
+        pyxel.text(117, 144, "Q  D", 7)
+        pyxel.text(173, 144, "<  >", 7)
         pyxel.circ(124,160,6,self.colors[self.col1_id])
         pyxel.circ(180, 160, 6, self.colors[self.col2_id])
+        pyxel.text(108, 130, "Choisissez votre couleur",9)
 
+        pyxel.rectb(130, 12, 52, 18,8)
         pyxel.text(140, 18, "OctoBall", self.colors[self.titleText_id])
+        pyxel.text(138, 44, "P : Pause", 11)
+        pyxel.text(126, 54, "Espace : Lancer", 2)
+        pyxel.text(2, 2, "Son", self.musicStateCol)
 
         pyxel.text(2,173, "Roan / Loris", 13)
         pyxel.text(303, 173, "2024",13)
