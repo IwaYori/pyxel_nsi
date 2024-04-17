@@ -95,7 +95,7 @@ class Menu:
         pyxel.circ(124,160,6,self.colors[self.col1_id])
         pyxel.circ(180, 160, 6, self.colors[self.col2_id])
 
-        pyxel.text(142, 18, "HaxBall", self.colors[self.titleText_id])
+        pyxel.text(140, 18, "OctoBall", self.colors[self.titleText_id])
 
         pyxel.text(2,173, "Roan / Loris", 13)
         pyxel.text(303, 173, "2024",13)
@@ -204,7 +204,7 @@ class Joueur2:
 class App:
     """classe mère qui lance la fenêtre"""
     def __init__(self):
-        pyxel.init(320, 180, title='HaxBall remake')
+        pyxel.init(320, 180, title='Octoball')
         pyxel.load('PYXEL_RESOURCE_FILE.pyxres')
         pyxel.run(self.update, self.draw)
 
