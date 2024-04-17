@@ -21,21 +21,25 @@ class Menu:
         self.isMusicStateChanged() # vérifie si self.musicState est changé
 
     def col1idPlus(self):
+        pyxel.play(2, 8)
         if self.col1_id == 10:
             self.col1_id = 0
         else:
             self.col1_id += 1
     def col2idPlus(self):
+        pyxel.play(2, 8)
         if self.col2_id == 10:
             self.col2_id = 0
         else:
             self.col2_id += 1
     def col1idMinus(self):
+        pyxel.play(2, 9)
         if self.col1_id == 0:
             self.col1_id = 10
         else:
             self.col1_id -= 1
     def col2idMinus(self):
+        pyxel.play(2, 9)
         if self.col2_id == 0:
             self.col2_id = 10
         else:
@@ -85,6 +89,7 @@ class Menu:
     def isTitleClicked(self): # easter egg
         if 142 <= pyxel.mouse_x <= 168 and 23 >= pyxel.mouse_y >= 18:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                pyxel.play(2, 7)
                 if self.titleText_id == 10:
                     self.titleText_id = 0
                 else:
@@ -98,10 +103,12 @@ class Menu:
                     pyxel.stop(0)
                     pyxel.stop(1)
                     pyxel.stop(3)
+                    pyxel.play(2,7)
                 else:
                     self.musicState = True # on change l'état de la variable
                     self.musicStateCol = 11 # on change la couleur du bouton
                     pyxel.playm(0,0,True)
+                    pyxel.play(2, 7)
 
 
     def draw(self):
@@ -131,16 +138,22 @@ class Jeu:
                            10:'Jaune',12:'Bleu ciel',13:'Gris',14:'Rose',15:'Beige'}
         self.j1 = Joueur1(0, col1, self.color_name[col1])
         self.j2 = Joueur2(0, col2, self.color_name[col2])
+        self.pauseState = False
         pyxel.run(self.update, self.draw)
 
     def update(self):
         self.j1.update(self.j2)
         self.j2.update()
 
+        self.isMenuButtonPressed() #la combinaison de touche R + O fait revenir au menu directement
+
+
+    def isPausedButtonPressed(self): # pas fini, à ne pas implementer dans update
         if pyxel.btnp(pyxel.KEY_P):
-            pass # futur menu pause
-        #la combinaison de touche R + O fait revenir au menu directement
-        elif pyxel.btnp(pyxel.KEY_R):
+            if not self.pauseState: # vérifie si le jeu est en pause
+                pyxel.rect(0,0,320,180,0)
+    def isMenuButtonPressed(self):
+        if pyxel.btnp(pyxel.KEY_R):
             if pyxel.btnp(pyxel.KEY_O):
                 pyxel.play(2,6)
                 Menu()
