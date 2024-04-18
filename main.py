@@ -178,27 +178,27 @@ class Joueur1:
         self.name = name
         self.coHaut=(self.x,self.y+self.speed) #coordonnées du point le plus en haut
         self.coBas=(self.x,self.y+self.speed)
-        self.collision = [False, False, False, False] #Haut Bas Gauche Droite
+        self.collision = [False, False, False, False] #Bas Haut Gauche Droite
 
     def update(self,j2):
         self.isCollision(j2) #on update pour voir si il ya une collision
         # permet le déplacement du joueur par rapport à la vitesse
-        if pyxel.btn(pyxel.KEY_Z) and not self.collision[0]:
+        if pyxel.btn(pyxel.KEY_Z):
             self.y = self.y - self.speed
-        if pyxel.btn(pyxel.KEY_S) and not self.collision[1]:
+        if pyxel.btn(pyxel.KEY_S) and not ((j2.x-6<self.x and self.x<j2.x-2) and (j2.y-6<self.y and self.y<j2.y-2))and not self.collision[0]:
             self.y = self.y + self.speed
-        if pyxel.btn(pyxel.KEY_Q) and not self.collision[2]:
+        if pyxel.btn(pyxel.KEY_Q):
             self.x = self.x - self.speed
-        if pyxel.btn(pyxel.KEY_D) and not self.collision[3]:
+        if pyxel.btn(pyxel.KEY_D)and not ((j2.x-6<self.x and self.x<j2.x-2) and (j2.y-6<self.y and self.y<j2.y-2)) and not self.collision[3]:
             self.x = self.x + self.speed
 
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
 
     def isCollision(self,j2):
-        #collision en haut
-        self.collision[0] = self.y+self.size == j2.y-j2.size and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
         #collision en bas
+        self.collision[0] = self.y+self.size == j2.y-j2.size and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
+        #collision en haut
         self.collision[1] = self.y-self.size == j2.y+j2.size and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
 
         #collision gauche
