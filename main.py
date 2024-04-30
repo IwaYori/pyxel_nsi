@@ -138,6 +138,7 @@ class Jeu:
                            10:'Jaune',12:'Bleu ciel',13:'Gris',14:'Rose',15:'Beige'}
         self.j1 = Joueur1(0, col1, self.color_name[col1])
         self.j2 = Joueur2(0, col2, self.color_name[col2])
+        self.balle = Balle()
         self.pauseState = False
         pyxel.run(self.update, self.draw)
 
@@ -163,10 +164,10 @@ class Jeu:
         pyxel.cls(11)
         self.j1.draw()
         self.j2.draw()
+        self.balle.draw()
 
 
 class Joueur1:
-
     def __init__(self, team, color, name):
         self.team = team
         self.x = 10
@@ -176,20 +177,22 @@ class Joueur1:
         self.speed = 2
         self.color = color
         self.name = name
-        self.coHaut=(self.x,self.y+self.speed) #coordonnées du point le plus en haut
-        self.coBas=(self.x,self.y+self.speed)
-        self.collision = [False, False, False, False] #Haut Bas Gauche Droite
+        self.coHaut = (self.x+self.size/2,self.y-self.size) # coordonnées du point le plus en haut      )
+        self.coBas = (self.x+self.size/2,self.y) # coordonnées du point le plus en bas                  ) fonctionne
+        self.coGauche = (self.x, self.y+self.size/2) # coordonnées du point le plus à gauche            ) pas
+        self.coDroite = (self.x+self.size, self.y+self.size/2) # coordonnées du point le plus à droite  )
+        self.collision = [False, False, False, False] # 0Bas 1Haut 2Gauche 3Droite
 
     def update(self,j2):
-        self.isCollision(j2) #on update pour voir si il ya une collision
+        self.isCollision(j2) # on update pour voir si il ya une collision
         # permet le déplacement du joueur par rapport à la vitesse
-        if pyxel.btn(pyxel.KEY_Z) and not self.collision[0]:
+        if pyxel.btn(pyxel.KEY_Z) and not self.collision[0]: #and not self.coHaut == 1:
             self.y = self.y - self.speed
-        if pyxel.btn(pyxel.KEY_S) and not self.collision[1]:
+        if pyxel.btn(pyxel.KEY_S) and not self.collision[1]:  #and not self.coBas == 180:
             self.y = self.y + self.speed
-        if pyxel.btn(pyxel.KEY_Q) and not self.collision[2]:
+        if pyxel.btn(pyxel.KEY_Q) and not self.collision[2]: #and not self.coGauche == 1:
             self.x = self.x - self.speed
-        if pyxel.btn(pyxel.KEY_D) and not self.collision[3]:
+        if pyxel.btn(pyxel.KEY_D) and not self.collision[3]: #and not self.coDroite == 320:
             self.x = self.x + self.speed
 
     def draw(self):
@@ -231,6 +234,16 @@ class Joueur2:
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
 
+class Balle:
+    def __init__(self):
+        self.size = 4
+        self.color = 7 # blanc
+        self.x = 4
+        self.y = 4
+        self.speed = 2
+
+    def draw(self):
+        pyxel.circ(self.x,self.y,self.size,self.color)
 
 
 ##############################################################
