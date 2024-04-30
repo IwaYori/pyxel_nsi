@@ -196,11 +196,10 @@ class Joueur1:
         pyxel.circ(self.x, self.y, self.size, self.color)
 
     def isCollision(self,j2):
-        #collision en haut
-        self.collision[0] = self.y+self.size == j2.y-j2.size and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
         #collision en bas
-        self.collision[1] = self.y-self.size == j2.y+j2.size and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
-
+        self.collision[0] = self.y+self.size == j2.y+(j2.size*3) and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
+        #collision en haut
+        self.collision[1] = self.y-self.size == j2.y-(j2.size*3) and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
         #collision gauche
         self.collision[2] = self.x-self.size == j2.x+j2.size and self.y <= j2.y+j2.size and self.y >= j2.y-j2.size
         #collision droite
