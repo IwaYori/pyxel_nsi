@@ -1,5 +1,5 @@
 import pyxel
-
+from math import sqrt
 class Menu:
     def __init__(self):
         # initialisation de la liste des couleurs possibles
@@ -138,80 +138,123 @@ class Jeu:
                            10:'Jaune',12:'Bleu ciel',13:'Gris',14:'Rose',15:'Beige'}
         self.j1 = Joueur1(0, col1, self.color_name[col1])
         self.j2 = Joueur2(0, col2, self.color_name[col2])
-        self.pauseState = False
+        self.balle = Balle()
+        self.pauseState = False # état du menu pause
+        self.pauseMusicStateCol = 11 # couleur du texte 'son' dans le menu pause
+        self.pauseMusicState = True
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        self.j1.update(self.j2)
-        self.j2.update()
+        if not self.pauseState:
+            self.j1.update(self.j2)
+            self.j2.update()
 
+        self.isPausedButtonPressed()
         self.isMenuButtonPressed() #la combinaison de touche R + O fait revenir au menu directement
-
+        self.isMusicStateChanged()
 
     def isPausedButtonPressed(self): # pas fini, à ne pas implementer dans update
         if pyxel.btnp(pyxel.KEY_P):
+            pyxel.play(2,13)
             if not self.pauseState: # vérifie si le jeu est en pause
-                pyxel.rect(0,0,320,180,0)
+                self.pauseState = True
+            else: self.pauseState = False
     def isMenuButtonPressed(self):
         if pyxel.btnp(pyxel.KEY_R):
             if pyxel.btnp(pyxel.KEY_O):
                 pyxel.play(2,6)
                 Menu()
+    def isMusicStateChanged(self):
+        if self.pauseState:
+            if 2 <= pyxel.mouse_x <= 13 and 8 >= pyxel.mouse_y >= 2:
+                if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                    if self.pauseMusicState:
+                        self.pauseMusicState = False # on change l'état de la variable
+                        self.pauseMusicStateCol = 4 # on change la couleur du bouton
+                        pyxel.stop(0)
+                        pyxel.stop(1)
+                        pyxel.stop(3)
+                        pyxel.play(2,7)
+                    else:
+                        self.pauseMusicState = True # on change l'état de la variable
+                        self.pauseMusicStateCol = 11 # on change la couleur du bouton
+                        pyxel.playm(0,0,True)
+                        pyxel.play(2, 7)
 
     def draw(self):
         pyxel.mouse(False)
         pyxel.cls(11)
         self.j1.draw()
         self.j2.draw()
+        self.balle.draw()
+
+        if self.pauseState:
+            pyxel.mouse(True)
+            pyxel.rect(0,0,320,180,0)
+            pyxel.text(124,34,'Jeu mis en pause',5)
+            pyxel.text(100, 54, 'Appuyez sur P pour reprendre', 7)
+            pyxel.text(2, 2, "Son", self.pauseMusicStateCol)
 
 
 class Joueur1:
-
     def __init__(self, team, color, name):
         self.team = team
-        self.x = 10
-        self.y = 10
+        self.x = 130
+        self.y = 90
         self.size = 6
         self.points = 0
         self.speed = 2
         self.color = color
         self.name = name
-        self.coHaut=(self.x,self.y+self.speed) #coordonnées du point le plus en haut
-        self.coBas=(self.x,self.y+self.speed)
-        self.collision = [False, False, False, False] #Bas Haut Gauche Droite
+        self.coHaut = (self.x+self.size/2,self.y-self.size) # coordonnées du point le plus en haut      )
+        self.coBas = (self.x+self.size/2,self.y) # coordonnées du point le plus en bas                  ) fonctionne
+        self.coGauche = (self.x, self.y+self.size/2) # coordonnées du point le plus à gauche            ) pas
+        self.coDroite = (self.x+self.size, self.y+self.size/2) # coordonnées du point le plus à droite  )
+        self.emplacementj2 = [False, False, False, False] # 0Bas 1Haut 2Gauche 3Droite si le joueur 2 est au dessus du j1 etc...
 
     def update(self,j2):
-        self.isCollision(j2) #on update pour voir si il ya une collision
-        # permet le déplacement du joueur par rapport à la vitesse
+        collision=self.isCollisionJoueur(j2)
+
         if pyxel.btn(pyxel.KEY_Z):
-            self.y = self.y - self.speed
-        if pyxel.btn(pyxel.KEY_S) and not ((j2.x-6<self.x and self.x<j2.x-2) and (j2.y-6<self.y and self.y<j2.y-2))and not self.collision[0]:
-            self.y = self.y + self.speed
+            if not collision and not self.emplacementj2[1]:
+                self.y = self.y - self.speed
+        if pyxel.btn(pyxel.KEY_S):
+            if not collision and not self.emplacementj2[0]:
+                self.y = self.y + self.speed
         if pyxel.btn(pyxel.KEY_Q):
             self.x = self.x - self.speed
-        if pyxel.btn(pyxel.KEY_D)and not ((j2.x-6<self.x and self.x<j2.x-2) and (j2.y-6<self.y and self.y<j2.y-2)) and not self.collision[3]:
+        if pyxel.btn(pyxel.KEY_D):
             self.x = self.x + self.speed
 
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
 
-    def isCollision(self,j2):
-        #collision en bas
-        self.collision[0] = self.y+self.size == j2.y-j2.size and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
-        #collision en haut
-        self.collision[1] = self.y-self.size == j2.y+j2.size and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
+    def isCollisionJoueur(self,j2):
+        """Renvoie True si il y a une collision entre les deux joueurs"""
+        distance=sqrt((self.x-j2.x)**2+(self.y-j2.y)**2)
+        return distance<=self.size*2
 
-        #collision gauche
-        self.collision[2] = self.x-self.size == j2.x+j2.size and self.y <= j2.y+j2.size and self.y >= j2.y-j2.size
-        #collision droite
-        self.collision[3] = self.x+self.size == j2.x-j2.size and self.y <= j2.y+j2.size and self.y >= j2.y-j2.size
+    def emplacementJ2(self,j2):
+        if j2.x>self.x:
+            self.emplacementj2[3]=True
+            self.emplacementj2[2]=False
+        else:
+            self.emplacementj2[2]=True
+            self.emplacementj2[3]=False
 
+        if j2.y>self.y:
+            self.emplacementj2[0]=True
+            self.emplacementj2[1]=False
+
+        else:
+            self.emplacementj2[1]=True
+            self.emplacementj2[0]=False
 
 class Joueur2:
     def __init__(self, team, color, name):
         self.team = team
-        self.x = 120
-        self.y = 120
+        self.x = 190
+        self.y = 90
         self.size = 6
         self.points = 0
         self.speed = 2
@@ -232,6 +275,16 @@ class Joueur2:
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
 
+class Balle:
+    def __init__(self):
+        self.size = 4
+        self.color = 7 # blanc
+        self.x = 160
+        self.y = 90
+        self.speed = 2
+
+    def draw(self):
+        pyxel.circ(self.x,self.y,self.size,self.color)
 
 
 ##############################################################
