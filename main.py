@@ -139,25 +139,47 @@ class Jeu:
         self.j1 = Joueur1(0, col1, self.color_name[col1])
         self.j2 = Joueur2(0, col2, self.color_name[col2])
         self.balle = Balle()
-        self.pauseState = False
+        self.pauseState = False # état du menu pause
+        self.pauseMusicStateCol = 11 # couleur du texte 'son' dans le menu pause
+        self.pauseMusicState = True
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        self.j1.update(self.j2)
-        self.j2.update()
+        if not self.pauseState:
+            self.j1.update(self.j2)
+            self.j2.update()
 
+        self.isPausedButtonPressed()
         self.isMenuButtonPressed() #la combinaison de touche R + O fait revenir au menu directement
-
+        self.isMusicStateChanged()
 
     def isPausedButtonPressed(self): # pas fini, à ne pas implementer dans update
         if pyxel.btnp(pyxel.KEY_P):
+            pyxel.play(2,13)
             if not self.pauseState: # vérifie si le jeu est en pause
-                pyxel.rect(0,0,320,180,0)
+                self.pauseState = True
+            else: self.pauseState = False
     def isMenuButtonPressed(self):
         if pyxel.btnp(pyxel.KEY_R):
             if pyxel.btnp(pyxel.KEY_O):
                 pyxel.play(2,6)
                 Menu()
+    def isMusicStateChanged(self):
+        if self.pauseState:
+            if 2 <= pyxel.mouse_x <= 13 and 8 >= pyxel.mouse_y >= 2:
+                if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                    if self.pauseMusicState:
+                        self.pauseMusicState = False # on change l'état de la variable
+                        self.pauseMusicStateCol = 4 # on change la couleur du bouton
+                        pyxel.stop(0)
+                        pyxel.stop(1)
+                        pyxel.stop(3)
+                        pyxel.play(2,7)
+                    else:
+                        self.pauseMusicState = True # on change l'état de la variable
+                        self.pauseMusicStateCol = 11 # on change la couleur du bouton
+                        pyxel.playm(0,0,True)
+                        pyxel.play(2, 7)
 
     def draw(self):
         pyxel.mouse(False)
@@ -165,6 +187,13 @@ class Jeu:
         self.j1.draw()
         self.j2.draw()
         self.balle.draw()
+
+        if self.pauseState:
+            pyxel.mouse(True)
+            pyxel.rect(0,0,320,180,0)
+            pyxel.text(124,34,'Jeu mis en pause',5)
+            pyxel.text(100, 54, 'Appuyez sur P pour reprendre', 7)
+            pyxel.text(2, 2, "Son", self.pauseMusicStateCol)
 
 
 class Joueur1:
