@@ -1,3 +1,5 @@
+import math
+
 import pyxel
 
 class Menu:
@@ -199,8 +201,8 @@ class Jeu:
 class Joueur1:
     def __init__(self, team, color, name):
         self.team = team
-        self.x = 10
-        self.y = 10
+        self.x = 130
+        self.y = 90
         self.size = 6
         self.points = 0
         self.speed = 2
@@ -210,32 +212,45 @@ class Joueur1:
         self.coBas = (self.x+self.size/2,self.y) # coordonnées du point le plus en bas                  ) fonctionne
         self.coGauche = (self.x, self.y+self.size/2) # coordonnées du point le plus à gauche            ) pas
         self.coDroite = (self.x+self.size, self.y+self.size/2) # coordonnées du point le plus à droite  )
-        self.collision = [False, False, False, False] # 0Bas 1Haut 2Gauche 3Droite
+        self.emplacementj2 = [False, False, False, False] # 0Bas 1Haut 2Gauche 3Droite si le joueur 2 est au dessus du j1 etc...
 
     def update(self,j2):
-        self.isCollision(j2) # on update pour voir si il ya une collision
-        # permet le déplacement du joueur par rapport à la vitesse
-        if pyxel.btn(pyxel.KEY_Z) and not self.collision[0]: #and not self.coHaut == 1:
-            self.y = self.y - self.speed
-        if pyxel.btn(pyxel.KEY_S) and not self.collision[1]:  #and not self.coBas == 180:
-            self.y = self.y + self.speed
-        if pyxel.btn(pyxel.KEY_Q) and not self.collision[2]: #and not self.coGauche == 1:
+        collision=self.isCollisionJoueur(j2)
+
+        if pyxel.btn(pyxel.KEY_Z):
+            if not collision and not self.emplacementj2[1]:
+                self.y = self.y - self.speed
+        if pyxel.btn(pyxel.KEY_S):
+            if not collision and not self.emplacementj2[0]:
+                self.y = self.y + self.speed
+        if pyxel.btn(pyxel.KEY_Q):
             self.x = self.x - self.speed
-        if pyxel.btn(pyxel.KEY_D) and not self.collision[3]: #and not self.coDroite == 320:
+        if pyxel.btn(pyxel.KEY_D):
             self.x = self.x + self.speed
 
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
 
-    def isCollision(self,j2):
-        #collision en bas
-        self.collision[0] = self.y+self.size == j2.y+(j2.size*3) and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
-        #collision en haut
-        self.collision[1] = self.y-self.size == j2.y-(j2.size*3) and self.x >= j2.x-j2.size and self.x <= j2.x+j2.size
-        #collision gauche
-        self.collision[2] = self.x-self.size == j2.x+j2.size and self.y <= j2.y+j2.size and self.y >= j2.y-j2.size
-        #collision droite
-        self.collision[3] = self.x+self.size == j2.x-j2.size and self.y <= j2.y+j2.size and self.y >= j2.y-j2.size
+    def isCollisionJoueur(self,j2):
+        """Renvoie True si il y a une collision entre les deux joueurs"""
+        distance=math.sqrt((self.x-j2.x)**2+(self.y-j2.y)**2)
+        return distance<=self.size*2
+
+    def emplacementJ2(self,j2):
+        if j2.x>self.x:
+            self.emplacementj2[3]=True
+            self.emplacementj2[2]=False
+        else:
+            self.emplacementj2[2]=True
+            self.emplacementj2[3]=False
+
+        if j2.y>self.y:
+            self.emplacementj2[0]=True
+            self.emplacementj2[1]=False
+
+        else:
+            self.emplacementj2[1]=True
+            self.emplacementj2[0]=False
 
 
 class Joueur2:
