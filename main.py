@@ -1,5 +1,4 @@
 import math
-
 import pyxel
 
 class Menu:
@@ -11,8 +10,8 @@ class Menu:
         self.col2_id = 4
         self.titleText_id = 6
 
-        self.j1Name = None
-        self.j2Name = None
+        self.t1Name = None
+        self.t2Name = None
 
         self.musicState = True # voir si le joueur décide d'avoir la musique ou non
         self.musicStateCol = 11 # couleur par défaut en 11 (vert)
@@ -120,12 +119,11 @@ class Menu:
     def isNameChanged(self):
         if 90 <= pyxel.mouse_x <= 144 and 120 >= pyxel.mouse_y >= 114:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                self.j1Name = input("Choisissez le nom de l'équipe 1 :")
+                self.t1Name = input("Choisissez le nom de l'équipe 1 :")
 
         if 166 <= pyxel.mouse_x <= 218 and 120 >= pyxel.mouse_y >= 114:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
-                self.j2Name = input("Choisissez le nom de l'équipe 2 :")
-
+                self.t2Name = input("Choisissez le nom de l'équipe 2 :")
 
 
     def draw(self):
@@ -151,20 +149,22 @@ class Menu:
 
 
 class Jeu:
-    def __init__(self, col1, col2, j1Name, j2Name):
-        # associe à chaque couleur son nom
-        self.j1Name = j1Name
-        self.j2Name = j2Name
-
+    def __init__(self, col1, col2, t1Name, t2Name):
+        self.t1Name = t1Name
+        self.t2Name = t2Name
+        # assigne à chaque identifiant sa couleur
         self.color_name = {1:'Bleu foncé',2:'Magenta',4:'Sang',5:'Bleu',8:'Rouge',9:'Orange',
                            10:'Jaune',12:'Bleu ciel',13:'Gris',14:'Rose',15:'Beige'}
-        if self.j1Name == None:
-            self.j1Name = self.color_name[col1] # si le nom de j1 est vide, il prend le nom de la couleur
-        if self.j2Name == None:
-            self.j2Name = self.color_name[col2] # si le nom de j2 est vide, il prend le nom de la couleur
+        if self.t1Name == None:
+            self.t1Name = self.color_name[col1] # si le nom de j1 est vide, il prend le nom de la couleur
+        if self.t2Name == None:
+            self.t2Name = self.color_name[col2] # si le nom de j2 est vide, il prend le nom de la couleur
 
-        self.j1 = Joueur1(col1, j1Name)
-        self.j2 = Joueur2(col2, j2Name)
+        self.team1 = Team(self.t1Name, col1)
+        self.team2 = Team(self.t2Name, col2)
+
+        self.j1 = Joueur1(col1, self.team1.name, self.team1)
+        self.j2 = Joueur2(col2, self.team2.name, self.team2)
         self.balle = Balle()
 
         self.pauseState = False # état du menu pause
@@ -236,15 +236,16 @@ class Jeu:
 
 
 class Joueur1:
-    def __init__(self, color, name):
+    def __init__(self, name, team):
         self.name = name
+        self.team = team
         self.x = 60
         self.y = 30
         self.size = 6
         self.speed = 2
 
-        self.points = 1
-        self.color = color
+        self.points = self.team.points
+        self.color = self.team.color
         self.collision = False
 
     def update(self, j2):
@@ -278,16 +279,17 @@ class Joueur1:
 
 
 class Joueur2:
-    def __init__(self, color, name):
+    def __init__(self, name, team):
         self.name = name
+        self.team = team
         self.x = 60
         self.y = 30
         self.size = 6
         self.speed = 2
 
-        self.points = 0
-        self.color = color
-        self.emplacementj1 = [False, False, False,False]  # 0Bas 1Haut 2Gauche 3Droite si le joueur 2 est au dessus du j1 etc...
+        self.points = self.team.points
+        self.color = self.team.color
+        self.collision = False
 
     def update(self):
         # permet le déplacement du joueur par rapport à la vitesse
@@ -303,6 +305,7 @@ class Joueur2:
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
 
+
 class Balle:
     def __init__(self):
         self.size = 4
@@ -314,6 +317,12 @@ class Balle:
     def draw(self):
         pyxel.circ(self.x,self.y,self.size,self.color)
 
+
+class Team:
+    def __init__(self, name, color):
+        self.name = name
+        self.color = color
+        self.points = 0
 
 ##############################################################
 
