@@ -4,7 +4,7 @@ import pyxel
 class Menu:
     def __init__(self):
         # initialisation de la liste des couleurs possibles
-        self.colors = [1,2,4,5,8,9,10,12,13,14,15]
+        self.colors = [1,2,4,5,8,9,10,12,14,15]
         # par défaut, joueur1 = colors[3] = 5 (bleu), joueur2 colors[4] = 8 (rouge)
         self.col1_id = 3
         self.col2_id = 4
@@ -29,13 +29,13 @@ class Menu:
 
     def col1idPlus(self):
         pyxel.play(2, 8)
-        if self.col1_id == 10:
+        if self.col1_id == 9: # 9 = dernière indice
             self.col1_id = 0
         else:
             self.col1_id += 1
     def col2idPlus(self):
         pyxel.play(2, 8)
-        if self.col2_id == 10:
+        if self.col2_id == 9: # 9 = dernière indice
             self.col2_id = 0
         else:
             self.col2_id += 1
@@ -92,7 +92,7 @@ class Menu:
             else:
                 pyxel.play(2,6)
                 # lance le jeu avec comme paramètre les deux couleurs
-                Jeu(self.colors[self.col1_id], self.colors[self.col2_id], self.j1Name, self.j2Name)
+                Jeu(self.colors[self.col1_id], self.colors[self.col2_id], self.t1Name, self.t2Name)
     def isTitleClicked(self): # easter egg
         if 142 <= pyxel.mouse_x <= 168 and 23 >= pyxel.mouse_y >= 18:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
@@ -117,11 +117,11 @@ class Menu:
                     pyxel.playm(0,0,True)
                     pyxel.play(2, 7)
     def isNameChanged(self):
-        if 90 <= pyxel.mouse_x <= 144 and 120 >= pyxel.mouse_y >= 114:
+        if 90 <= pyxel.mouse_x <= 150 and 120 >= pyxel.mouse_y >= 114:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 self.t1Name = input("Choisissez le nom de l'équipe 1 :")
 
-        if 166 <= pyxel.mouse_x <= 218 and 120 >= pyxel.mouse_y >= 114:
+        if 170 <= pyxel.mouse_x <= 210 and 120 >= pyxel.mouse_y >= 114:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 self.t2Name = input("Choisissez le nom de l'équipe 2 :")
 
@@ -150,18 +150,18 @@ class Menu:
 
 class Jeu:
     def __init__(self, col1, col2, t1Name, t2Name):
+        # associe à chaque couleur son nom
         self.t1Name = t1Name
         self.t2Name = t2Name
-        # assigne à chaque identifiant sa couleur
         self.color_name = {1:'Bleu foncé',2:'Magenta',4:'Sang',5:'Bleu',8:'Rouge',9:'Orange',
-                           10:'Jaune',12:'Bleu ciel',13:'Gris',14:'Rose',15:'Beige'}
+                           10:'Jaune',12:'Bleu ciel',14:'Rose',15:'Beige'}
         if self.t1Name == None:
-            self.t1Name = self.color_name[col1] # si le nom de j1 est vide, il prend le nom de la couleur
+            self.t1Name = self.color_name[col1] # si le nom de t1 est vide, il prend le nom de la couleur
         if self.t2Name == None:
-            self.t2Name = self.color_name[col2] # si le nom de j2 est vide, il prend le nom de la couleur
+            self.t2Name = self.color_name[col2] # si le nom de t2 est vide, il prend le nom de la couleur
 
-        self.team1 = Team(self.t1Name, col1)
-        self.team2 = Team(self.t2Name, col2)
+        self.team1 = Team(self.t1Name,col1)
+        self.team2 = Team(self.t2Name,col2)
 
         self.j1 = Joueur1(col1, self.team1.name, self.team1)
         self.j2 = Joueur2(col2, self.team2.name, self.team2)
@@ -176,13 +176,14 @@ class Jeu:
 
     def update(self):
         if not self.pauseState:
-            self.j1.update(self.j2)
+            self.j1.update(self.j2,self.balle)
             self.j2.update()
+            self.balle.update()
 
         self.isPausedButtonPressed()
         self.isMenuButtonPressed() #la combinaison de touche R + O fait revenir au menu directement
         self.isMusicStateChanged()
-        self.defineWinStateColor() # détermine la couleur de celui qui gagne
+        self.defineWinStateColor()
 
     def isPausedButtonPressed(self): # pas fini, à ne pas implementer dans update
         if pyxel.btnp(pyxel.KEY_P):
@@ -212,11 +213,11 @@ class Jeu:
                         pyxel.playm(0,0,True)
                         pyxel.play(2, 7)
     def defineWinStateColor(self):
-        if self.j1.points > self.j2.points:
-            self.winStateCol = self.j1.color
-        elif self.j1.points < self.j2.points:
-            self.winStateCol = self.j2.color
-        else: self.winStateCol = 11
+        if self.team1.points > self.team2.points:
+            self.winStateCol = self.team1.color
+        elif self.team1.points < self.team2.points:
+            self.winStateCol = self.team2.color
+        else: self.winStateCol = 13
 
     def draw(self):
         pyxel.mouse(False)
@@ -236,7 +237,7 @@ class Jeu:
 
 
 class Joueur1:
-    def __init__(self, name, team):
+    def __init__(self, color, name, team):
         self.name = name
         self.team = team
         self.x = 60
@@ -245,11 +246,17 @@ class Joueur1:
         self.speed = 2
 
         self.points = self.team.points
-        self.color = self.team.color
+        self.color = color
         self.collision = False
 
-    def update(self, j2):
+    def update(self, j2, balle):
+        self.collisionBalle(balle)
         self.isCollisionJoueur(j2)
+
+        if self.speed < 2:
+            self.speed*=1.2  # permet au joueur de retrouver sa vitesse initial post contact avec la balle
+        elif self.speed > 2:
+            self.speed = 2
 
         if pyxel.btn(pyxel.KEY_Z):
             if self.y > 0+self.size:
@@ -277,9 +284,19 @@ class Joueur1:
             self.collision = True
         else: self.collision = False
 
+    def collisionBalle(self,balle):
+        distanceBalle = math.sqrt((self.x - balle.x)**2 + (self.y - balle.y)**2)
+
+        if distanceBalle <= self.size + balle.size + 2: #Distance j1 + balle
+            balle.angle = math.atan2(balle.y - self.y, balle.x - self.x)
+            balle.vitesse_x = math.cos(balle.angle)
+            balle.vitesse_y = math.sin(balle.angle)
+            self.speed = 0.8 # ralentit le joueur au contact
+
+
 
 class Joueur2:
-    def __init__(self, name, team):
+    def __init__(self, color, name, team):
         self.name = name
         self.team = team
         self.x = 60
@@ -288,8 +305,8 @@ class Joueur2:
         self.speed = 2
 
         self.points = self.team.points
-        self.color = self.team.color
-        self.collision = False
+        self.color = color
+        self.emplacementj1 = [False, False, False,False]  # 0Bas 1Haut 2Gauche 3Droite si le joueur 2 est au dessus du j1 etc...
 
     def update(self):
         # permet le déplacement du joueur par rapport à la vitesse
@@ -310,9 +327,20 @@ class Balle:
     def __init__(self):
         self.size = 4
         self.color = 7 # blanc
-        self.x = 4
-        self.y = 4
-        self.speed = 2
+        self.x = 90
+        self.y = 90
+        self.angle=0
+        self.vitesse_x = 0
+        self.vitesse_y= 0
+
+    def update(self):
+        if 0+self.size < self.x < 320-self.size:
+            self.x = self.x + self.vitesse_x
+        if 0+self.size < self.y < 180-self.size:
+            self.y = self.y - self.vitesse_y
+
+        self.vitesse_x*=0.989 #Ralentir la balle
+        self.vitesse_y*=0.989
 
     def draw(self):
         pyxel.circ(self.x,self.y,self.size,self.color)
@@ -323,6 +351,10 @@ class Team:
         self.name = name
         self.color = color
         self.points = 0
+
+    def addPoints(self):
+        self.points += 1
+
 
 ##############################################################
 
