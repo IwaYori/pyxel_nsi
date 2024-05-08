@@ -138,8 +138,8 @@ class Jeu:
         # associe à chaque couleur son nom
         self.color_name = {1:'Bleu foncé',2:'Magenta',4:'Sang',5:'Bleu',8:'Rouge',9:'Orange',
                            10:'Jaune',12:'Bleu ciel',13:'Gris',14:'Rose',15:'Beige'}
-        self.j1 = Joueur1(0, col1, self.color_name[col1])
-        self.j2 = Joueur2(0, col2, self.color_name[col2])
+        self.j1 = Joueur1(col1, self.color_name[col1])
+        self.j2 = Joueur2(col2, self.color_name[col2])
         self.balle = Balle()
         self.pauseState = False # état du menu pause
         self.pauseMusicStateCol = 11 # couleur du texte 'son' dans le menu pause
@@ -199,34 +199,35 @@ class Jeu:
 
 
 class Joueur1:
-    def __init__(self, team, color, name):
-        self.team = team
-        self.x = 130
-        self.y = 90
-        self.size = 6
-        self.points = 0
-        self.speed = 2
-        self.color = color
+    def __init__(self, color, name):
         self.name = name
-        self.coHaut = (self.x+self.size/2,self.y-self.size) # coordonnées du point le plus en haut      )
-        self.coBas = (self.x+self.size/2,self.y) # coordonnées du point le plus en bas                  ) fonctionne
-        self.coGauche = (self.x, self.y+self.size/2) # coordonnées du point le plus à gauche            ) pas
-        self.coDroite = (self.x+self.size, self.y+self.size/2) # coordonnées du point le plus à droite  )
+        self.x = 60
+        self.y = 30
+        self.size = 6
+        self.speed = 2
+
+        self.points = 0
+        self.winningState = 0 # 0 si égalité, True si gagne, False si perd
+        self.color = color
         self.emplacementj2 = [False, False, False, False] # 0Bas 1Haut 2Gauche 3Droite si le joueur 2 est au dessus du j1 etc...
 
     def update(self,j2):
         collision=self.isCollisionJoueur(j2)
 
         if pyxel.btn(pyxel.KEY_Z):
-            if not collision and not self.emplacementj2[1]:
-                self.y = self.y - self.speed
+            if self.y > 0+self.size:
+                if not collision and not self.emplacementj2[1]:
+                    self.y = self.y - self.speed + 0.2
         if pyxel.btn(pyxel.KEY_S):
-            if not collision and not self.emplacementj2[0]:
-                self.y = self.y + self.speed
+            if self.y < 180 - self.size:
+                if not collision and not self.emplacementj2[0]:
+                    self.y = self.y + self.speed - 0.2
         if pyxel.btn(pyxel.KEY_Q):
-            self.x = self.x - self.speed
+            if self.x > 0 + self.size:
+                self.x = self.x - self.speed
         if pyxel.btn(pyxel.KEY_D):
-            self.x = self.x + self.speed
+            if self.x < 320 - self.size:
+                self.x = self.x + self.speed
 
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
@@ -254,15 +255,17 @@ class Joueur1:
 
 
 class Joueur2:
-    def __init__(self, team, color, name):
-        self.team = team
-        self.x = 120
-        self.y = 120
-        self.size = 6
-        self.points = 0
-        self.speed = 2
-        self.color = color
+    def __init__(self, color, name):
         self.name = name
+        self.x = 60
+        self.y = 30
+        self.size = 6
+        self.speed = 2
+
+        self.points = 0
+        self.winningState = 0  # 0 si égalité, True si gagne, False si perd
+        self.color = color
+        self.emplacementj1 = [False, False, False,False]  # 0Bas 1Haut 2Gauche 3Droite si le joueur 2 est au dessus du j1 etc...
 
     def update(self):
         # permet le déplacement du joueur par rapport à la vitesse
