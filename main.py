@@ -10,6 +10,8 @@ class Menu:
         self.col1_id = 3
         self.col2_id = 4
         self.titleText_id = 6
+        self.j1Name = None
+        self.j2Name = None
         self.musicState = True # voir si le joueur décide d'avoir la musique ou non
         self.musicStateCol = 11 # couleur par défaut en 11 (vert)
         pyxel.playm(0,0,True)
@@ -21,6 +23,7 @@ class Menu:
 
         self.isTitleClicked() # vérifie si quelqu'un clique sur le titre (easter egg)
         self.isMusicStateChanged() # vérifie si self.musicState est changé
+        self.isNameChanged()
 
     def col1idPlus(self):
         pyxel.play(2, 8)
@@ -87,7 +90,7 @@ class Menu:
             else:
                 pyxel.play(2,6)
                 # lance le jeu avec comme paramètre les deux couleurs
-                Jeu(self.colors[self.col1_id], self.colors[self.col2_id])
+                Jeu(self.colors[self.col1_id], self.colors[self.col2_id], self.j1Name, self.j2Name)
     def isTitleClicked(self): # easter egg
         if 142 <= pyxel.mouse_x <= 168 and 23 >= pyxel.mouse_y >= 18:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
@@ -111,6 +114,15 @@ class Menu:
                     self.musicStateCol = 11 # on change la couleur du bouton
                     pyxel.playm(0,0,True)
                     pyxel.play(2, 7)
+    def isNameChanged(self):
+        if 90 <= pyxel.mouse_x <= 150 and 120 >= pyxel.mouse_y >= 114:
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                self.j1Name = input("Choisissez le nom de l'équipe 1 :")
+
+        if 170 <= pyxel.mouse_x <= 210 and 120 >= pyxel.mouse_y >= 114:
+            if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
+                self.j2Name = input("Choisissez le nom de l'équipe 2 :")
+
 
 
     def draw(self):
@@ -127,6 +139,8 @@ class Menu:
         pyxel.text(140, 18, "OctoBall", self.colors[self.titleText_id])
         pyxel.text(138, 44, "P : Pause", 11)
         pyxel.text(126, 54, "Espace : Lancer", 2)
+        pyxel.text(90, 114, 'Changer nom T1',3)
+        pyxel.text(170, 114, 'Changer nom T2',3)
         pyxel.text(2, 2, "Son", self.musicStateCol)
 
         pyxel.text(2,173, "Roan / Loris", 13)
@@ -134,16 +148,27 @@ class Menu:
 
 
 class Jeu:
-    def __init__(self, col1, col2):
+    def __init__(self, col1, col2, j1Name, j2Name):
         # associe à chaque couleur son nom
+        self.j1Name = j1Name
+        self.j2Name = j2Name
+
         self.color_name = {1:'Bleu foncé',2:'Magenta',4:'Sang',5:'Bleu',8:'Rouge',9:'Orange',
                            10:'Jaune',12:'Bleu ciel',13:'Gris',14:'Rose',15:'Beige'}
-        self.j1 = Joueur1(col1, self.color_name[col1])
-        self.j2 = Joueur2(col2, self.color_name[col2])
+        if self.j1Name == None:
+            self.j1Name = self.color_name[col1] # si le nom de j1 est vide, il prend le nom de la couleur
+        if self.j2Name == None:
+            self.j2Name = self.color_name[col2] # si le nom de j2 est vide, il prend le nom de la couleur
+
+        self.j1 = Joueur1(col1, j1Name)
+        self.j2 = Joueur2(col2, j2Name)
         self.balle = Balle()
+
         self.pauseState = False # état du menu pause
         self.pauseMusicStateCol = 11 # couleur du texte 'son' dans le menu pause
         self.pauseMusicState = True
+        self.winStateCol = 11 # couleur de celui qui gagne, 11 (couleur terrain) si égalité
+
         pyxel.run(self.update, self.draw)
 
     def update(self):
@@ -154,6 +179,7 @@ class Jeu:
         self.isPausedButtonPressed()
         self.isMenuButtonPressed() #la combinaison de touche R + O fait revenir au menu directement
         self.isMusicStateChanged()
+        self.defineWinStateColor()
 
     def isPausedButtonPressed(self): # pas fini, à ne pas implementer dans update
         if pyxel.btnp(pyxel.KEY_P):
@@ -182,6 +208,12 @@ class Jeu:
                         self.pauseMusicStateCol = 11 # on change la couleur du bouton
                         pyxel.playm(0,0,True)
                         pyxel.play(2, 7)
+    def defineWinStateColor(self):
+        if self.j1.points > self.j2.points:
+            self.winStateCol = self.j1.color
+        elif self.j1.points < self.j2.points:
+            self.winStateCol = self.j2.color
+        else: self.winStateCol = 11
 
     def draw(self):
         pyxel.mouse(False)
@@ -189,6 +221,8 @@ class Jeu:
         self.j1.draw()
         self.j2.draw()
         self.balle.draw()
+
+        pyxel.rectb(0,0,320,180, self.winStateCol)
 
         if self.pauseState:
             pyxel.mouse(True)
@@ -206,22 +240,19 @@ class Joueur1:
         self.size = 6
         self.speed = 2
 
-        self.points = 0
-        self.winningState = 0 # 0 si égalité, True si gagne, False si perd
+        self.points = 1
         self.color = color
-        self.emplacementj2 = [False, False, False, False] # 0Bas 1Haut 2Gauche 3Droite si le joueur 2 est au dessus du j1 etc...
+        self.collision = False
 
-    def update(self,j2):
-        collision=self.isCollisionJoueur(j2)
+    def update(self, j2):
+        self.isCollisionJoueur(j2)
 
         if pyxel.btn(pyxel.KEY_Z):
             if self.y > 0+self.size:
-                if not collision and not self.emplacementj2[1]:
-                    self.y = self.y - self.speed + 0.2
+                self.y = self.y - self.speed + 0.2
         if pyxel.btn(pyxel.KEY_S):
             if self.y < 180 - self.size:
-                if not collision and not self.emplacementj2[0]:
-                    self.y = self.y + self.speed - 0.2
+                self.y = self.y + self.speed - 0.2
         if pyxel.btn(pyxel.KEY_Q):
             if self.x > 0 + self.size:
                 self.x = self.x - self.speed
@@ -231,27 +262,16 @@ class Joueur1:
 
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
+        if self.collision: # test uniquement mis dans la classe Joueur 1 car si le j1 est en collision avec le j2, le j2 est
+            pyxel.dither(0.5) # en collision avec le j1, inutile de recopier cette partie dans l'autre classe
+        else: pyxel.dither(1) # dither change l'opacité des sprites affichés (hors le fond)
 
     def isCollisionJoueur(self,j2):
         """Renvoie True si il y a une collision entre les deux joueurs"""
         distance=math.sqrt((self.x-j2.x)**2+(self.y-j2.y)**2)
-        return distance<=self.size*2
-
-    def emplacementJ2(self,j2):
-        if j2.x>self.x:
-            self.emplacementj2[3]=True
-            self.emplacementj2[2]=False
-        else:
-            self.emplacementj2[2]=True
-            self.emplacementj2[3]=False
-
-        if j2.y>self.y:
-            self.emplacementj2[0]=True
-            self.emplacementj2[1]=False
-
-        else:
-            self.emplacementj2[1]=True
-            self.emplacementj2[0]=False
+        if distance<=self.size*2:
+            self.collision = True
+        else: self.collision = False
 
 
 class Joueur2:
@@ -263,7 +283,6 @@ class Joueur2:
         self.speed = 2
 
         self.points = 0
-        self.winningState = 0  # 0 si égalité, True si gagne, False si perd
         self.color = color
         self.emplacementj1 = [False, False, False,False]  # 0Bas 1Haut 2Gauche 3Droite si le joueur 2 est au dessus du j1 etc...
 
