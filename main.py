@@ -10,10 +10,13 @@ class Menu:
         self.col1_id = 3
         self.col2_id = 4
         self.titleText_id = 6
+
         self.j1Name = None
         self.j2Name = None
+
         self.musicState = True # voir si le joueur décide d'avoir la musique ou non
         self.musicStateCol = 11 # couleur par défaut en 11 (vert)
+
         pyxel.playm(0,0,True)
         pyxel.run(self.update, self.draw)
 
@@ -115,11 +118,11 @@ class Menu:
                     pyxel.playm(0,0,True)
                     pyxel.play(2, 7)
     def isNameChanged(self):
-        if 90 <= pyxel.mouse_x <= 150 and 120 >= pyxel.mouse_y >= 114:
+        if 90 <= pyxel.mouse_x <= 144 and 120 >= pyxel.mouse_y >= 114:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 self.j1Name = input("Choisissez le nom de l'équipe 1 :")
 
-        if 170 <= pyxel.mouse_x <= 210 and 120 >= pyxel.mouse_y >= 114:
+        if 166 <= pyxel.mouse_x <= 218 and 120 >= pyxel.mouse_y >= 114:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 self.j2Name = input("Choisissez le nom de l'équipe 2 :")
 
@@ -140,7 +143,7 @@ class Menu:
         pyxel.text(138, 44, "P : Pause", 11)
         pyxel.text(126, 54, "Espace : Lancer", 2)
         pyxel.text(90, 114, 'Changer nom T1',3)
-        pyxel.text(170, 114, 'Changer nom T2',3)
+        pyxel.text(166, 114, 'Changer nom T2',3)
         pyxel.text(2, 2, "Son", self.musicStateCol)
 
         pyxel.text(2,173, "Roan / Loris", 13)
@@ -179,7 +182,7 @@ class Jeu:
         self.isPausedButtonPressed()
         self.isMenuButtonPressed() #la combinaison de touche R + O fait revenir au menu directement
         self.isMusicStateChanged()
-        self.defineWinStateColor()
+        self.defineWinStateColor() # détermine la couleur de celui qui gagne
 
     def isPausedButtonPressed(self): # pas fini, à ne pas implementer dans update
         if pyxel.btnp(pyxel.KEY_P):
