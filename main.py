@@ -92,7 +92,7 @@ class Menu:
             else:
                 pyxel.play(2,6)
                 # lance le jeu avec comme paramètre les deux couleurs
-                Jeu(self.colors[self.col1_id], self.colors[self.col2_id], self.t1Name, self.t2Name)
+                Jeu(self.colors[self.col1_id], self.colors[self.col2_id], self.t1Name, self.t2Name, 10)
     def isTitleClicked(self): # easter egg
         if 142 <= pyxel.mouse_x <= 168 and 23 >= pyxel.mouse_y >= 18:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
@@ -136,7 +136,7 @@ class Menu:
         pyxel.circ(180, 160, 6, self.colors[self.col2_id])
         pyxel.text(108, 130, "Choisissez votre couleur",9)
 
-        pyxel.rectb(130, 12, 52, 18,8)
+        pyxel.rectb(130, 12, 52, 18,8) # cadre autour du titre
         pyxel.text(140, 18, "OctoBall", self.colors[self.titleText_id])
         pyxel.text(138, 44, "P : Pause", 11)
         pyxel.text(126, 54, "Espace : Lancer", 2)
@@ -149,12 +149,13 @@ class Menu:
 
 
 class Jeu:
-    def __init__(self, col1, col2, t1Name, t2Name):
-        # associe à chaque couleur son nom
+    def __init__(self, col1, col2, t1Name, t2Name, scoreLimit):
+        self.scoreLimit = scoreLimit
+
         self.t1Name = t1Name
         self.t2Name = t2Name
         self.color_name = {1:'Bleu foncé',2:'Magenta',4:'Sang',5:'Bleu',8:'Rouge',9:'Orange',
-                           10:'Jaune',12:'Bleu ciel',14:'Rose',15:'Beige'}
+                           10:'Jaune',12:'Bleu ciel',14:'Rose',15:'Beige'} # associe à chaque couleur son nom
         if self.t1Name == None:
             self.t1Name = self.color_name[col1] # si le nom de t1 est vide, il prend le nom de la couleur
         if self.t2Name == None:
@@ -229,7 +230,7 @@ class Jeu:
         pyxel.rectb(0,0,320,180, self.winStateCol)
 
         if self.pauseState:
-            pyxel.mouse(True)
+            pyxel.mouse(True) # affiche la souris
             pyxel.rect(0,0,320,180,0)
             pyxel.text(124,34,'Jeu mis en pause',5)
             pyxel.text(100, 54, 'Appuyez sur P pour reprendre', 7)
@@ -240,8 +241,8 @@ class Joueur1:
     def __init__(self, color, name, team):
         self.name = name
         self.team = team
-        self.x = 60
-        self.y = 30
+        self.x = 10
+        self.y = 20
         self.size = 6
         self.speed = 2
 
@@ -291,7 +292,7 @@ class Joueur1:
             balle.angle = math.atan2(balle.y - self.y, balle.x - self.x)
             balle.vitesse_x = math.cos(balle.angle)
             balle.vitesse_y = math.sin(balle.angle)
-            self.speed = 0.8 # ralentit le joueur au contact
+            self.speed = 0.82 # ralentit le joueur au contact
 
 
 
