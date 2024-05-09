@@ -10,8 +10,12 @@ class Menu:
         self.col2_id = 4
         self.titleText_id = 6
 
+        self.playerNumber = 2 # de base, le jeu contient 2 joueurs (1vs1)
+
         self.t1Name = None
         self.t2Name = None
+        self.scores = [1,2,3,4,5,6] # liste des limites de score
+        self.scoreLimitId = 2 # id qui correspond à 3 dans la liste au dessus
 
         self.musicState = True # voir si le joueur décide d'avoir la musique ou non
         self.musicStateCol = 11 # couleur par défaut en 11 (vert)
@@ -22,11 +26,13 @@ class Menu:
     def update(self):
         self.isGameLaunched() # vérifie si le jeu doit être lancé
         self.isColorChanged() # vérifie si un des joueurs essaie de changer sa couleur
-
         self.isTitleClicked() # vérifie si quelqu'un clique sur le titre (easter egg)
         self.isMusicStateChanged() # vérifie si self.musicState est changé
-        self.isNameChanged()
+        self.isNameChanged() # vérifie si le nom d'une équipe est changé
+        self.isPlayerNumberChanged() # vérifie si le nb de joueurs est changé
+        self.isScoreLimitChanged() # vérifie si le score limite est changé
 
+    # impossibilité de réduire ces 4 fonctions en une même si ceci paraît évident
     def col1idPlus(self):
         pyxel.play(2, 8)
         if self.col1_id == 9: # 9 = dernière indice
@@ -51,7 +57,6 @@ class Menu:
             self.col2_id = 10
         else:
             self.col2_id -= 1
-
     def isColorChanged(self):
         # permet de changer la couleur du joueur 1 à l'aide:
         # de 'Q' ou 'D', ou d'un clique gauche ou droit sur le joueur 1
@@ -82,7 +87,6 @@ class Menu:
                 self.col2idMinus()
             if pyxel.btnp(pyxel.MOUSE_BUTTON_RIGHT):
                 self.col2idPlus()
-
     def isGameLaunched(self):
         # espace est la touche qui permet de lancer le jeu
         if pyxel.btn(pyxel.KEY_SPACE):
@@ -91,8 +95,8 @@ class Menu:
                 pyxel.play(2, 4)
             else:
                 pyxel.play(2,6)
-                # lance le jeu avec comme paramètre les deux couleurs
-                Jeu(self.colors[self.col1_id], self.colors[self.col2_id], self.t1Name, self.t2Name, 10)
+                # lance le jeu avec comme paramètre les deux couleurs, les noms d'équipe, le score limite et le nombre de joueurs
+                Jeu(self.colors[self.col1_id], self.colors[self.col2_id], self.t1Name, self.t2Name, self.scores[self.scoreLimitId], self.playerNumber)
     def isTitleClicked(self): # easter egg
         if 142 <= pyxel.mouse_x <= 168 and 23 >= pyxel.mouse_y >= 18:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
@@ -124,6 +128,26 @@ class Menu:
         if 170 <= pyxel.mouse_x <= 210 and 120 >= pyxel.mouse_y >= 114:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 self.t2Name = input("Choisissez le nom de l'équipe 2 :")
+    def isPlayerNumberChanged(self):
+        if pyxel.btnp(pyxel.KEY_V):
+            if self.playerNumber == 2:
+                self.playerNumber = 4
+            else: self.playerNumber = 2
+            pyxel.play(2,8)
+    def isScoreLimitChanged(self):
+        if pyxel.btnp(pyxel.KEY_UP):
+            if self.scoreLimitId == len(self.scores)-1: # si l'id est le dernier de la liste
+                 pyxel.play(2, 4) # cela n'augmente pas plus
+            else:
+                self.scoreLimitId += 1 # sinon il s'incrémente
+                pyxel.play(2, 9)
+
+        if pyxel.btnp(pyxel.KEY_DOWN):
+            if self.scoreLimitId == 0: # si l'id est le premier de la liste
+                pyxel.play(2, 4) # cela ne descend pas plus
+            else :
+                self.scoreLimitId -= 1 # sinon il se décrémente
+                pyxel.play(2, 9)
 
 
     def draw(self):
@@ -140,17 +164,24 @@ class Menu:
         pyxel.text(140, 18, "OctoBall", self.colors[self.titleText_id])
         pyxel.text(138, 44, "P : Pause", 11)
         pyxel.text(126, 54, "Espace : Lancer", 2)
+        pyxel.text(100, 64, "V : Changer le nb de joueurs", 12)
+        pyxel.text(112, 84, f"Nombre de joueurs : {self.playerNumber}", 10)
         pyxel.text(90, 114, 'Changer nom T1',3)
         pyxel.text(166, 114, 'Changer nom T2',3)
         pyxel.text(2, 2, "Son", self.musicStateCol)
+
+        pyxel.text(280, 4, "UP", 7)
+        pyxel.text(250, 14, f"Limite score : {self.scores[self.scoreLimitId]}", 10)
+        pyxel.text(276, 24, "DOWN", 7)
 
         pyxel.text(2,173, "Roan / Loris", 13)
         pyxel.text(303, 173, "2024",13)
 
 
 class Jeu:
-    def __init__(self, col1, col2, t1Name, t2Name, scoreLimit):
+    def __init__(self, col1, col2, t1Name, t2Name, scoreLimit, playerNumber):
         self.scoreLimit = scoreLimit
+        self.playerNumber = playerNumber
 
         self.t1Name = t1Name
         self.t2Name = t2Name
@@ -244,7 +275,7 @@ class Joueur1:
         self.x = 10
         self.y = 20
         self.size = 6
-        self.speed = 2
+        self.speed = 3
 
         self.points = self.team.points
         self.color = color
@@ -291,9 +322,9 @@ class Joueur1:
         if distanceBalle <= self.size + balle.size + 2: #Distance j1 + balle
             balle.angle = math.atan2(balle.y - self.y, balle.x - self.x)
 
-            balle.angle += math.pi
-            balle.vitesse_x = math.cos(balle.angle)
-            balle.vitesse_y = math.sin(balle.angle)
+            #balle.angle += math.pi
+            balle.vitesse_x = math.cos(balle.angle) + 0.3
+            balle.vitesse_y = math.sin(balle.angle) + 0.3
             self.speed = 0.82 # ralentit le joueur au contact
 
 
