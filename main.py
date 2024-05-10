@@ -418,7 +418,7 @@ class Balle:
         self.x = 90
         self.y = 90
         self.angle=0
-        self.vitesse_x = -3
+        self.vitesse_x = 0
         self.vitesse_y= 0
 
     def update(self):
