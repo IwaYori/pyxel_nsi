@@ -197,17 +197,22 @@ class Jeu:
 
         self.j1 = Joueur1(col1, self.team1.name, self.team1)
         self.j2 = Joueur2(col2, self.team2.name, self.team2)
+
+        if self.playerNumber == 4:
+            pass # rajouter les 2 autres joueurs
+
         self.balle = Balle()
 
         self.pauseState = False # état du menu pause
         self.pauseMusicStateCol = 11 # couleur du texte 'son' dans le menu pause
         self.pauseMusicState = True
         self.winStateCol = 11 # couleur de celui qui gagne, 11 (couleur terrain) si égalité
+        self.winState = False
 
         pyxel.run(self.update, self.draw)
 
     def update(self):
-        if not self.pauseState:
+        if not self.pauseState and self.winState == 0: # vérifie si le jeu n'est pas en pause et que personne n'a gagné
             self.j1.update(self.j2,self.balle)
             self.j2.update()
             self.balle.update()
@@ -216,6 +221,8 @@ class Jeu:
         self.isMenuButtonPressed() #la combinaison de touche R + O fait revenir au menu directement
         self.isMusicStateChanged()
         self.defineWinStateColor()
+        self.isBallReset()
+        self.winStateCheck()
 
     def isPausedButtonPressed(self): # pas fini, à ne pas implementer dans update
         if pyxel.btnp(pyxel.KEY_P):
@@ -250,6 +257,20 @@ class Jeu:
         elif self.team1.points < self.team2.points:
             self.winStateCol = self.team2.color
         else: self.winStateCol = 13
+    def isBallReset(self): # en cas de soucis, combinaison de MAJ + TAB pour remettre la balle au centre
+        if pyxel.btnp(pyxel.KEY_SHIFT):
+            if pyxel.btnp(pyxel.KEY_TAB):
+                pyxel.play(2, 6)
+                self.balle.x = 160
+                self.balle.y = 80
+                self.balle.vitesse_x = 0
+                self.balle.vitesse_y
+    def winStateCheck(self):
+        if not self.winState:
+            if self.team1.points == self.scoreLimit:
+                self.winState = self.team1.name
+            elif self.team2.points == self.scoreLimit:
+                self.winState = self.team2.name
 
     def draw(self):
         pyxel.mouse(False)
@@ -257,7 +278,6 @@ class Jeu:
         self.j1.draw()
         self.j2.draw()
         self.balle.draw()
-
         pyxel.rectb(0,0,320,180, self.winStateCol)
 
         if self.pauseState:
@@ -266,6 +286,14 @@ class Jeu:
             pyxel.text(124,34,'Jeu mis en pause',5)
             pyxel.text(100, 54, 'Appuyez sur P pour reprendre', 7)
             pyxel.text(2, 2, "Son", self.pauseMusicStateCol)
+
+        if self.winState != 0:
+            pyxel.stop(0)
+            pyxel.stop(1)
+            pyxel.stop(3)
+            pyxel.text(124, 76, f'Victoire de {self.winState}') # self.winState aura comme valeur l'équipe gagnante (str)
+            pyxel.text(98,86, 'R+O pour revenir au menu principal')
+
 
 
 class Joueur1:
