@@ -217,25 +217,13 @@ class Jeu:
             self.j2.update()
             self.balle.update()
 
-            if self.balle.x-self.balle.size<=0 and self.balle.y>=pyxel.height/3 and self.balle.y<= 2*(pyxel.height/3): #Si but à gauche
-                self.team2.addPoints()
-                self.balle.x=pyxel.width/2
-                self.balle.y=pyxel.height/2
-                self.balle.vitesse_x,self.balle.vitesse_y=0,0
-
-            if self.balle.x+self.balle.size>=pyxel.width and self.balle.y>=pyxel.height/3 and self.balle.y<= 2*(pyxel.height/3): #Si but à droite
-                self.team1.addPoints()
-                self.balle.x=pyxel.width/2
-                self.balle.y=pyxel.height/2
-                self.balle.vitesse_x, self.balle.vitesse_y = 0, 0
-
-
         self.isPausedButtonPressed()
         self.isMenuButtonPressed() #la combinaison de touche R + O fait revenir au menu directement
         self.isMusicStateChanged()
         self.defineWinStateColor()
         self.isBallReset()
         self.winStateCheck()
+        self.goalCheck() # vérifie si un but est marqué
 
     def isPausedButtonPressed(self): # pas fini, à ne pas implementer dans update
         if pyxel.btnp(pyxel.KEY_P):
@@ -284,6 +272,22 @@ class Jeu:
                 self.winState = self.team1.name
             elif self.team2.points == self.scoreLimit:
                 self.winState = self.team2.name
+    def goalCheck(self):
+        if self.balle.x - self.balle.size <= 10 and self.balle.y >= pyxel.height / 3 and self.balle.y <= 2 * (pyxel.height / 3):  # Si but à gauche
+            self.team2.addPoints()
+            self.balle.x = pyxel.width / 2
+            self.balle.y = pyxel.height / 2
+            self.balle.vitesse_x, self.balle.vitesse_y = 0, 0
+            pyxel.play(2, 6)
+            # ajouter replacement des joueurs
+
+        if self.balle.x + self.balle.size >= pyxel.width - 10 and self.balle.y >= pyxel.height / 3 and self.balle.y <= 2 * (pyxel.height / 3):  # Si but à droite
+            self.team1.addPoints()
+            self.balle.x = pyxel.width / 2
+            self.balle.y = pyxel.height / 2
+            self.balle.vitesse_x, self.balle.vitesse_y = 0, 0
+            pyxel.play(2, 6)
+            # ajouter replacement des joueurs
 
     def draw(self):
         pyxel.mouse(False)
@@ -415,8 +419,8 @@ class Balle:
     def __init__(self):
         self.size = 4
         self.color = 7 # blanc
-        self.x = 90
-        self.y = 90
+        self.x = pyxel.width / 2
+        self.y = pyxel.height / 2
         self.angle=0
         self.vitesse_x = 0
         self.vitesse_y= 0
