@@ -344,7 +344,7 @@ class Jeu:
             pyxel.stop(0)
             pyxel.stop(1)
             pyxel.stop(3)
-            pyxel.text(114, 76, f"Victoire de l'équipe {self.winState}", 2) # self.winState aura comme valeur l'équipe gagnante (str)
+            pyxel.text(106, 76, f"Victoire de l'équipe {self.winState}", 2) # self.winState aura comme valeur l'équipe gagnante (str)
             pyxel.text(94,106, 'R+O pour revenir au menu principal', 12)
 
 
