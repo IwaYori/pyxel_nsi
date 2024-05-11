@@ -195,11 +195,12 @@ class Jeu:
         self.team1 = Team(self.t1Name,col1)
         self.team2 = Team(self.t2Name,col2)
 
-        self.j1 = Joueur1(col1, self.team1.name, self.team1)
-        self.j2 = Joueur2(col2, self.team2.name, self.team2)
+        self.j1 = Joueur(col1, self.team1.name, self.team1, self.playerNumber, 0)
+        self.j2 = Joueur(col2, self.team2.name, self.team2, self.playerNumber, 1)
 
         if self.playerNumber == 4:
-            pass # rajouter les 2 autres joueurs
+            self.j3 = Joueur(col1, self.team1.name, self.team1, self.playerNumber, 2)
+            self.j4 = Joueur(col2, self.team2.name, self.team2, self.playerNumber, 3)
 
         self.balle = Balle()
 
@@ -213,8 +214,14 @@ class Jeu:
 
     def update(self):
         if not self.pauseState and self.winState == 0: # vérifie si le jeu n'est pas en pause et que personne n'a gagné
-            self.j1.update(self.j2,self.balle)
-            self.j2.update()
+            if self.playerNumber == 2:
+                self.j1.update(self.balle, self.j2)
+                self.j2.update(self.balle, self.j1)
+            else: # si il y a 4 joueurs
+                self.j1.update(self.balle, self.j2, self.j3, self.j4)
+                self.j2.update(self.balle, self.j1, self.j3, self.j4)
+                self.j3.update(self.balle, self.j2, self.j1, self.j4)
+                self.j4.update(self.balle, self.j2, self.j1, self.j3)
             self.balle.update()
 
         self.isPausedButtonPressed()
@@ -262,8 +269,8 @@ class Jeu:
         if pyxel.btnp(pyxel.KEY_SHIFT):
             if pyxel.btnp(pyxel.KEY_TAB):
                 pyxel.play(2, 6)
-                self.balle.x = 160
-                self.balle.y = 80
+                self.balle.x = pyxel.width / 2
+                self.balle.y = pyxel.height / 2
                 self.balle.vitesse_x = 0
                 self.balle.vitesse_y
     def winStateCheck(self):
@@ -279,7 +286,9 @@ class Jeu:
             self.balle.y = pyxel.height / 2
             self.balle.vitesse_x, self.balle.vitesse_y = 0, 0
             pyxel.play(2, 6)
-            # ajouter replacement des joueurs
+            # replacement des joueurs
+
+
 
         if self.balle.x + self.balle.size >= pyxel.width - 10 and self.balle.y >= pyxel.height / 3 and self.balle.y <= 2 * (pyxel.height / 3):  # Si but à droite
             self.team1.addPoints()
@@ -288,12 +297,31 @@ class Jeu:
             self.balle.vitesse_x, self.balle.vitesse_y = 0, 0
             pyxel.play(2, 6)
             # ajouter replacement des joueurs
+            if self.playerNumber == 2:
+                self.j1.x = (pyxel.width/2)/2
+                self.j1.y = pyxel.height/2
+                self.j2.x = (pyxel.width / 2) + (pyxel.width / 2) / 2
+                self.j2.y = pyxel.height / 2
+            else:
+                self.j1.x = (pyxel.width/2)/2
+                self.j1.y = (pyxel.height/2)-20
+                self.j2.x = (pyxel.width / 2) + (pyxel.width / 2) / 2
+                self.j2.y = (pyxel.height / 2) - 20
+                self.j3.x = (pyxel.width / 2) / 2
+                self.j3.y = (pyxel.height / 2) + 20
+                self.j4.x = (pyxel.width / 2) + (pyxel.width / 2) / 2
+                self.j4.y = (pyxel.height / 2) + 20
 
     def draw(self):
         pyxel.mouse(False)
         pyxel.cls(11)
+
         self.j1.draw()
         self.j2.draw()
+        if self.playerNumber == 4:
+            self.j3.draw()
+            self.j4.draw()
+
         self.balle.draw()
         pyxel.line(pyxel.width / 2, 0, pyxel.width / 2, pyxel.height, 7)
         pyxel.circb(pyxel.width/2,pyxel.height/2,20,7)
@@ -303,9 +331,6 @@ class Jeu:
 
         pyxel.rectb(0,pyxel.height/3,20,pyxel.height/3,7) #Cage gauche
         pyxel.rectb(pyxel.width-20, pyxel.height / 3, 20, pyxel.height / 3, 7) #Cage droite
-
-
-
 
 
         if self.pauseState:
@@ -319,45 +344,116 @@ class Jeu:
             pyxel.stop(0)
             pyxel.stop(1)
             pyxel.stop(3)
-            pyxel.text(124, 76, f'Victoire de {self.winState}') # self.winState aura comme valeur l'équipe gagnante (str)
-            pyxel.text(98,86, 'R+O pour revenir au menu principal')
+            pyxel.text(114, 76, f"Victoire de l'équipe {self.winState}", 2) # self.winState aura comme valeur l'équipe gagnante (str)
+            pyxel.text(94,106, 'R+O pour revenir au menu principal', 12)
 
 
 
-class Joueur1:
-    def __init__(self, color, name, team):
+class Joueur:
+    def __init__(self, color, name, team, playerNumber, id):
+        self.id = id # permet de différencier les joueurs j1 = 0, j2 = 1...
         self.name = name
         self.team = team
-        self.x = 10
-        self.y = 20
+        self.playerNumber = playerNumber
+
+        if self.id == 0: # j1
+            if self.playerNumber == 2:
+                self.x = (pyxel.width/2)/2
+                self.y = pyxel.height/2
+            else:
+                self.x = (pyxel.width/2)/2
+                self.y = (pyxel.height/2)-20
+
+        elif self.id == 1: # j2
+            if self.playerNumber == 2:
+                self.x = (pyxel.width/2)+(pyxel.width/2)/2
+                self.y = pyxel.height/2
+            else:
+                self.x = (pyxel.width/2)+(pyxel.width/2)/2
+                self.y = (pyxel.height/2)-20
+
+        elif self.id == 2: # j3
+            self.x = (pyxel.width/2)/2
+            self.y = (pyxel.height/2)+20
+
+        elif self.id == 3: # j4
+            self.x = (pyxel.width/2)+(pyxel.width/2)/2
+            self.y = (pyxel.height/2)+20
+
         self.size = 6
         self.speed = 3
-
         self.points = self.team.points
         self.color = color
         self.collision = False
 
-    def update(self, j2, balle):
-        self.collisionBalle(balle)
+    def update(self, balle, j2, j3=None, j4=None): # ici l'appellation j1, j2.. est arbitraire
+        self.collisionBalle(balle)                 # et ne correspond pas forcément aux joueurs 1, 2... respectifs
         self.isCollisionJoueur(j2)
+
+        if self.playerNumber== 4:
+            self.isCollisionJoueur(j3)
+            self.isCollisionJoueur(j4)
 
         if self.speed < 2:
             self.speed*=1.2  # permet au joueur de retrouver sa vitesse initial post contact avec la balle
         elif self.speed > 2:
             self.speed = 2
 
-        if pyxel.btn(pyxel.KEY_Z):
-            if self.y > 0+self.size:
-                self.y = self.y - self.speed + 0.2
-        if pyxel.btn(pyxel.KEY_S):
-            if self.y < 180 - self.size:
-                self.y = self.y + self.speed - 0.2
-        if pyxel.btn(pyxel.KEY_Q):
-            if self.x > 0 + self.size:
-                self.x = self.x - self.speed
-        if pyxel.btn(pyxel.KEY_D):
-            if self.x < 320 - self.size:
-                self.x = self.x + self.speed
+        if self.id == 0:
+            if pyxel.btn(pyxel.KEY_Z):
+                if self.y > 0+self.size:
+                    self.y = self.y - self.speed + 0.2
+            if pyxel.btn(pyxel.KEY_S):
+                if self.y < 180 - self.size:
+                    self.y = self.y + self.speed - 0.2
+            if pyxel.btn(pyxel.KEY_Q):
+                if self.x > 0 + self.size:
+                    self.x = self.x - self.speed
+            if pyxel.btn(pyxel.KEY_D):
+                if self.x < 320 - self.size:
+                    self.x = self.x + self.speed
+
+        elif self.id == 1:
+            if pyxel.btn(pyxel.KEY_UP):
+                if self.y > 0 + self.size:
+                    self.y = self.y - self.speed + 0.2
+            if pyxel.btn(pyxel.KEY_DOWN):
+                if self.y < 180 - self.size:
+                    self.y = self.y + self.speed - 0.2
+            if pyxel.btn(pyxel.KEY_LEFT):
+                if self.x > 0 + self.size:
+                    self.x = self.x - self.speed
+            if pyxel.btn(pyxel.KEY_RIGHT):
+                if self.x < 320 - self.size:
+                    self.x = self.x + self.speed
+
+        elif self.id == 2:
+            if pyxel.btn(pyxel.KEY_Y):
+                if self.y > 0+self.size:
+                    self.y = self.y - self.speed + 0.2
+            if pyxel.btn(pyxel.KEY_H):
+                if self.y < 180 - self.size:
+                    self.y = self.y + self.speed - 0.2
+            if pyxel.btn(pyxel.KEY_G):
+                if self.x > 0 + self.size:
+                    self.x = self.x - self.speed
+            if pyxel.btn(pyxel.KEY_J):
+                if self.x < 320 - self.size:
+                    self.x = self.x + self.speed
+
+        elif self.id == 3:
+            if pyxel.btn(pyxel.KEY_O):
+                if self.y > 0+self.size:
+                    self.y = self.y - self.speed + 0.2
+            if pyxel.btn(pyxel.KEY_L):
+                if self.y < 180 - self.size:
+                    self.y = self.y + self.speed - 0.2
+            if pyxel.btn(pyxel.KEY_K):
+                if self.x > 0 + self.size:
+                    self.x = self.x - self.speed
+            if pyxel.btn(pyxel.KEY_M):
+                if self.x < 320 - self.size:
+                    self.x = self.x + self.speed
 
     def draw(self):
         pyxel.circ(self.x, self.y, self.size, self.color)
@@ -384,35 +480,6 @@ class Joueur1:
             self.speed = 0.82 # ralentit le joueur au contact
 
 
-
-
-
-class Joueur2:
-    def __init__(self, color, name, team):
-        self.name = name
-        self.team = team
-        self.x = 60
-        self.y = 30
-        self.size = 6
-        self.speed = 2
-
-        self.points = self.team.points
-        self.color = color
-        self.emplacementj1 = [False, False, False,False]  # 0Bas 1Haut 2Gauche 3Droite si le joueur 2 est au dessus du j1 etc...
-
-    def update(self):
-        # permet le déplacement du joueur par rapport à la vitesse
-        if pyxel.btn(pyxel.KEY_UP):
-            self.y = self.y - self.speed
-        if pyxel.btn(pyxel.KEY_DOWN):
-            self.y = self.y + self.speed
-        if pyxel.btn(pyxel.KEY_LEFT):
-            self.x = self.x - self.speed
-        if pyxel.btn(pyxel.KEY_RIGHT):
-            self.x = self.x + self.speed
-
-    def draw(self):
-        pyxel.circ(self.x, self.y, self.size, self.color)
 
 
 class Balle:
