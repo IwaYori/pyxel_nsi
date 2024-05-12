@@ -315,20 +315,20 @@ class Jeu:
             pyxel.play(2, 6)
 
             # replacement des joueurs post-but
-            if self.playerNumber == 2:
-                self.j1.x = (pyxel.width/2)/2
-                self.j1.y = pyxel.height/2
-                self.j2.x = (pyxel.width / 2) + (pyxel.width / 2) / 2
-                self.j2.y = pyxel.height / 2
-            else:
-                self.j1.x = (pyxel.width/2)/2
-                self.j1.y = (pyxel.height/2)-20
-                self.j2.x = (pyxel.width / 2) + (pyxel.width / 2) / 2
-                self.j2.y = (pyxel.height / 2) - 20
-                self.j3.x = (pyxel.width / 2) / 2
-                self.j3.y = (pyxel.height / 2) + 20
-                self.j4.x = (pyxel.width / 2) + (pyxel.width / 2) / 2
-                self.j4.y = (pyxel.height / 2) + 20
+        if self.playerNumber == 2:
+            self.j1.x = (pyxel.width/2)/2
+            self.j1.y = pyxel.height/2
+            self.j2.x = (pyxel.width / 2) + (pyxel.width / 2) / 2
+            self.j2.y = pyxel.height / 2
+        else:
+            self.j1.x = (pyxel.width/2)/2
+            self.j1.y = (pyxel.height/2)-20
+            self.j2.x = (pyxel.width / 2) + (pyxel.width / 2) / 2
+            self.j2.y = (pyxel.height / 2) - 20
+            self.j3.x = (pyxel.width / 2) / 2
+            self.j3.y = (pyxel.height / 2) + 20
+            self.j4.x = (pyxel.width / 2) + (pyxel.width / 2) / 2
+            self.j4.y = (pyxel.height / 2) + 20
 
     def draw(self):
         pyxel.mouse(False)
