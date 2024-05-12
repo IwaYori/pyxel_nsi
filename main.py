@@ -57,6 +57,7 @@ class Menu:
             self.col2_id = 10
         else:
             self.col2_id -= 1
+
     def isColorChanged(self):
         # permet de changer la couleur du joueur 1 à l'aide:
         # de 'Q' ou 'D', ou d'un clique gauche ou droit sur le joueur 1
@@ -87,6 +88,7 @@ class Menu:
                 self.col2idMinus()
             if pyxel.btnp(pyxel.MOUSE_BUTTON_RIGHT):
                 self.col2idPlus()
+
     def isGameLaunched(self):
         # espace est la touche qui permet de lancer le jeu
         if pyxel.btn(pyxel.KEY_SPACE):
@@ -97,6 +99,7 @@ class Menu:
                 pyxel.play(2,6)
                 # lance le jeu avec comme paramètre les deux couleurs, les noms d'équipe, le score limite et le nombre de joueurs
                 Jeu(self.colors[self.col1_id], self.colors[self.col2_id], self.t1Name, self.t2Name, self.scores[self.scoreLimitId], self.playerNumber)
+
     def isTitleClicked(self): # easter egg
         if 142 <= pyxel.mouse_x <= 168 and 23 >= pyxel.mouse_y >= 18:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
@@ -105,6 +108,7 @@ class Menu:
                     self.titleText_id = 0
                 else:
                     self.titleText_id += 1
+
     def isMusicStateChanged(self):
         if 2 <= pyxel.mouse_x <= 13 and 8 >= pyxel.mouse_y >= 2:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
@@ -120,6 +124,7 @@ class Menu:
                     self.musicStateCol = 11 # on change la couleur du bouton
                     pyxel.playm(0,0,True)
                     pyxel.play(2, 7)
+
     def isNameChanged(self):
         if 90 <= pyxel.mouse_x <= 150 and 120 >= pyxel.mouse_y >= 114:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
@@ -128,12 +133,14 @@ class Menu:
         if 170 <= pyxel.mouse_x <= 210 and 120 >= pyxel.mouse_y >= 114:
             if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
                 self.t2Name = input("Choisissez le nom de l'équipe 2 :")
+
     def isPlayerNumberChanged(self):
         if pyxel.btnp(pyxel.KEY_V):
             if self.playerNumber == 2:
                 self.playerNumber = 4
             else: self.playerNumber = 2
             pyxel.play(2,8)
+
     def isScoreLimitChanged(self):
         if pyxel.btnp(pyxel.KEY_UP):
             if self.scoreLimitId == len(self.scores)-1: # si l'id est le dernier de la liste
@@ -156,8 +163,8 @@ class Menu:
 
         pyxel.text(117, 144, "Q  D", 7)
         pyxel.text(173, 144, "<  >", 7)
-        pyxel.circ(124,160,6,self.colors[self.col1_id])
-        pyxel.circ(180, 160, 6, self.colors[self.col2_id])
+        pyxel.circ(124,160,6,self.colors[self.col1_id]) # cercle de j1
+        pyxel.circ(180, 160, 6, self.colors[self.col2_id]) # cercle de j2
         pyxel.text(108, 130, "Choisissez votre couleur",9)
 
         pyxel.rectb(130, 12, 52, 18,8) # cadre autour du titre
@@ -180,11 +187,11 @@ class Menu:
 
 class Jeu:
     def __init__(self, col1, col2, t1Name, t2Name, scoreLimit, playerNumber):
-        self.scoreLimit = scoreLimit
-        self.playerNumber = playerNumber
+        self.scoreLimit = scoreLimit # limite de score
+        self.playerNumber = playerNumber # nb de joueurs
 
-        self.t1Name = t1Name
-        self.t2Name = t2Name
+        self.t1Name = t1Name # nom eq 1
+        self.t2Name = t2Name # nom eq 2
         self.color_name = {1:'Bleu foncé',2:'Magenta',4:'Sang',5:'Bleu',8:'Rouge',9:'Orange',
                            10:'Jaune',12:'Bleu ciel',14:'Rose',15:'Beige'} # associe à chaque couleur son nom
         if self.t1Name == None:
@@ -192,23 +199,23 @@ class Jeu:
         if self.t2Name == None:
             self.t2Name = self.color_name[col2] # si le nom de t2 est vide, il prend le nom de la couleur
 
-        self.team1 = Team(self.t1Name,col1)
+        self.team1 = Team(self.t1Name,col1) # création des équipes
         self.team2 = Team(self.t2Name,col2)
 
-        self.j1 = Joueur(col1, self.team1.name, self.team1, self.playerNumber, 0)
+        self.j1 = Joueur(col1, self.team1.name, self.team1, self.playerNumber, 0) # création des joueurs
         self.j2 = Joueur(col2, self.team2.name, self.team2, self.playerNumber, 1)
 
         if self.playerNumber == 4:
             self.j3 = Joueur(col1, self.team1.name, self.team1, self.playerNumber, 2)
             self.j4 = Joueur(col2, self.team2.name, self.team2, self.playerNumber, 3)
 
-        self.balle = Balle()
+        self.balle = Balle() # création de la balle
 
         self.pauseState = False # état du menu pause
         self.pauseMusicStateCol = 11 # couleur du texte 'son' dans le menu pause
-        self.pauseMusicState = True
+        self.pauseMusicState = True # état de si la musique doit être jouée ou non
         self.winStateCol = 11 # couleur de celui qui gagne, 11 (couleur terrain) si égalité
-        self.winState = False
+        self.winState = False # état de si une équipe à gagner ou non
 
         pyxel.run(self.update, self.draw)
 
@@ -225,25 +232,30 @@ class Jeu:
             self.balle.update()
 
         self.isPausedButtonPressed()
-        self.isMenuButtonPressed() #la combinaison de touche R + O fait revenir au menu directement
+        self.isMenuButtonPressed() # la combinaison de touche R + O fait revenir au menu directement
         self.isMusicStateChanged()
         self.defineWinStateColor()
         self.isBallReset()
         self.winStateCheck()
         self.goalCheck() # vérifie si un but est marqué
 
-    def isPausedButtonPressed(self): # pas fini, à ne pas implementer dans update
+    def isPausedButtonPressed(self):
+        """Vérifie si le bouton pause est pressé ou non"""
         if pyxel.btnp(pyxel.KEY_P):
             pyxel.play(2,13)
             if not self.pauseState: # vérifie si le jeu est en pause
                 self.pauseState = True
             else: self.pauseState = False
+
     def isMenuButtonPressed(self):
+        """Vérifie si la combinaison de retour au menu est pressée ou non"""
         if pyxel.btnp(pyxel.KEY_R):
             if pyxel.btnp(pyxel.KEY_O):
                 pyxel.play(2,6)
                 Menu()
+
     def isMusicStateChanged(self):
+        """Vérifie si l'état de si la musique doit être jouée ou non est changé"""
         if self.pauseState:
             if 2 <= pyxel.mouse_x <= 13 and 8 >= pyxel.mouse_y >= 2:
                 if pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
@@ -259,13 +271,17 @@ class Jeu:
                         self.pauseMusicStateCol = 11 # on change la couleur du bouton
                         pyxel.playm(0,0,True)
                         pyxel.play(2, 7)
+
     def defineWinStateColor(self):
+        """Détermine la couleur actuelle de l'équipe gagnante"""
         if self.team1.points > self.team2.points:
             self.winStateCol = self.team1.color
         elif self.team1.points < self.team2.points:
             self.winStateCol = self.team2.color
         else: self.winStateCol = 13
-    def isBallReset(self): # en cas de soucis, combinaison de MAJ + TAB pour remettre la balle au centre
+
+    def isBallReset(self):
+        """Permet de réinitialiser la position de la balle avec la combinaison SHIFT+TAB en cas de bug"""
         if pyxel.btnp(pyxel.KEY_SHIFT):
             if pyxel.btnp(pyxel.KEY_TAB):
                 pyxel.play(2, 6)
@@ -273,22 +289,23 @@ class Jeu:
                 self.balle.y = pyxel.height / 2
                 self.balle.vitesse_x = 0
                 self.balle.vitesse_y
+
     def winStateCheck(self):
+        """Vérifie si une équipe a gagné ou non"""
         if not self.winState:
             if self.team1.points == self.scoreLimit:
                 self.winState = self.team1.name
             elif self.team2.points == self.scoreLimit:
                 self.winState = self.team2.name
+
     def goalCheck(self):
+        """Vérifie si un but a été marqué ou non"""
         if self.balle.x - self.balle.size <= 10 and self.balle.y >= pyxel.height / 3 and self.balle.y <= 2 * (pyxel.height / 3):  # Si but à gauche
             self.team2.addPoints()
             self.balle.x = pyxel.width / 2
             self.balle.y = pyxel.height / 2
             self.balle.vitesse_x, self.balle.vitesse_y = 0, 0
             pyxel.play(2, 6)
-            # replacement des joueurs
-
-
 
         if self.balle.x + self.balle.size >= pyxel.width - 10 and self.balle.y >= pyxel.height / 3 and self.balle.y <= 2 * (pyxel.height / 3):  # Si but à droite
             self.team1.addPoints()
@@ -296,7 +313,8 @@ class Jeu:
             self.balle.y = pyxel.height / 2
             self.balle.vitesse_x, self.balle.vitesse_y = 0, 0
             pyxel.play(2, 6)
-            # ajouter replacement des joueurs
+
+            # replacement des joueurs post-but
             if self.playerNumber == 2:
                 self.j1.x = (pyxel.width/2)/2
                 self.j1.y = pyxel.height/2
@@ -356,6 +374,7 @@ class Joueur:
         self.team = team
         self.playerNumber = playerNumber
 
+        # détermination des coordonnées des joueurs
         if self.id == 0: # j1
             if self.playerNumber == 2:
                 self.x = (pyxel.width/2)/2
@@ -380,8 +399,8 @@ class Joueur:
             self.x = (pyxel.width/2)+(pyxel.width/2)/2
             self.y = (pyxel.height/2)+20
 
-        self.size = 6
-        self.speed = 3
+        self.size = 6 # taille des joueurs
+        self.speed = 3 # vitesse des joueurs
         self.points = self.team.points
         self.color = color
         self.collision = False
@@ -396,9 +415,10 @@ class Joueur:
 
         if self.speed < 2:
             self.speed*=1.2  # permet au joueur de retrouver sa vitesse initial post contact avec la balle
-        elif self.speed > 2:
+        elif self.speed > 2: # (voir classe Balle pour comprendre pourquoi le joueur est ralentit au contact de la balle)
             self.speed = 2
 
+        # gestion des touches selon le joueur grâce aux identifiants self.id
         if self.id == 0:
             if pyxel.btn(pyxel.KEY_Z):
                 if self.y > 0+self.size:
@@ -462,19 +482,20 @@ class Joueur:
         else: pyxel.dither(1) # dither change l'opacité des sprites affichés (hors le fond)
 
     def isCollisionJoueur(self,j2):
-        """Renvoie True si il y a une collision entre les deux joueurs"""
+        """Vérifie s'il y a une collision entre les deux joueurs"""
         distance=math.sqrt((self.x-j2.x)**2+(self.y-j2.y)**2)
         if distance<=self.size*2:
             self.collision = True
         else: self.collision = False
 
     def collisionBalle(self,balle):
+        """Déplace la balle lors d'une collision avec un joueur"""
         distanceBalle = math.sqrt((self.x - balle.x)**2 + (self.y - balle.y)**2)
 
-        if distanceBalle <= self.size + balle.size + 2: #Distance j1 + balle
+        if distanceBalle <= self.size + balle.size + 2: #Distance joueur + balle + 2
             balle.angle = math.atan2(balle.y - self.y, balle.x - self.x)
 
-            #balle.angle += math.pi
+            #balle.angle += math.pi # à ne pas prendre en compte
             balle.vitesse_x = math.cos(balle.angle) + 0.3
             balle.vitesse_y = math.sin(balle.angle) + 0.3
             self.speed = 0.82 # ralentit le joueur au contact
@@ -497,6 +518,7 @@ class Balle:
         self.x = self.x + self.vitesse_x
         self.y = self.y - self.vitesse_y
 
+        # fait rebondir la balle sur les bords
         if self.x - self.size <= 0 or self.x + self.size >= pyxel.width: #Vérifier contact avec les bords
             self.vitesse_x *= -1
         if self.y - self.size <= 0 or self.y + self.size >= pyxel.height:
@@ -517,6 +539,7 @@ class Team:
         self.points = 0
 
     def addPoints(self):
+        """Ajoute un point à une équipe"""
         self.points += 1
 
 
